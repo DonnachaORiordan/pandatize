@@ -256,8 +256,8 @@
     // The day's to-do list sits above the time grid
     const left = Pz.todos.leftCount(cursor);
     viewEl.appendChild(h('div', { class: 'day-todos' }, [
-      h('div', { class: 'sec-head' }, [h('h2', { text: 'To-dos' }), h('span', { text: Pz.todos.forDay(cursor).length ? left + ' left' : '' })]),
-      h('div', { class: 'card' }, Pz.todos.rows(cursor))
+      h('div', { class: 'sec-head' }, [h('h2', { text: 'To-dos' }), h('span', { text: Pz.todos.count(cursor) ? left + ' left' : '' })]),
+      h('div', { class: 'card' }, Pz.todos.rows(cursor, 'day'))
     ]));
     const card = h('div', { class: 'tg-card' });
     const allday = I.onDay(cursor).filter(o => o.type === 'allday');
@@ -268,12 +268,12 @@
 
   // ---------- Day panel ----------
   function fillPanel() {
-    const occ = I.onDay(panelDate), todoCount = Pz.todos.forDay(panelDate).length;
+    const occ = I.onDay(panelDate), todoCount = Pz.todos.count(panelDate);
     const count = (type, one, many) => { const n = occ.filter(o => o.type === type).length; return n ? plural(n, one, many) : null; };
     const summary = [count('event', 'event', 'events'), count('deadline', 'deadline', 'deadlines'), count('allday', 'all-day item', 'all-day items'),
       todoCount ? plural(todoCount, 'to-do', 'to-dos') : null].filter(Boolean).join(' · ') || 'Nothing planned';
     const old = panel.querySelector('.panel-list'), keep = old ? old.scrollTop : 0;
-    const list = h('div', { class: 'panel-list' }, occ.map(o => itemRow(o, false)).concat(Pz.todos.rows(panelDate)));
+    const list = h('div', { class: 'panel-list' }, occ.map(o => itemRow(o, false)).concat(Pz.todos.rows(panelDate, 'panel')));
     const grab = h('div', { class: 'panel-grab', role: 'button', 'aria-label': 'Close day panel', onclick: closePanel }, [h('div', { class: 'grabber' })]);
     let startY = null;                       // drag the grabber down to close
     grab.addEventListener('pointerdown', e => { startY = e.clientY; });
@@ -327,5 +327,5 @@
     document.querySelectorAll('.now-line').forEach(n => { n.style.top = D.nowMin() / 60 * +n.closest('.tg').dataset.h + 'px'; });
   }
 
-  Pz.calendar = { init: init, refresh: refresh, tick: tick, closePanel: closePanel, panelOpen: () => !!panel, deleteItem: deleteItem, goDay: goDay };
+  Pz.calendar = { init: init, refresh: refresh, tick: tick, closePanel: closePanel, panelOpen: () => !!panel, deleteItem: deleteItem, goDay: goDay, timeGrid: timeGrid };
 })();

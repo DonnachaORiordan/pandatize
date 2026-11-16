@@ -7,7 +7,22 @@
   let focusDay = null;     // after adding a to-do, keep the typing cursor in that day's "add" box
 
   T.forDay = day => Pz.data.todos.filter(t => t.date === day);
-  T.leftCount = day => Pz.data.todos.filter(t => t.date === day && !t.done).length;
+
+  // To-dos that live in a list but have a due date also show on a day:
+  // on their due day; on today if overdue and not done; and once ticked, on the day they were ticked (if later).
+  T.listEntries = day => {
+    const today = D.today(), out = [];
+    Pz.data.lists.forEach(l => l.entries.forEach(e => {
+      if (e.kind !== 'todo' || !e.due) return;
+      let show;
+      if (e.done) { const ticked = (e.doneAt || '').slice(0, 10); show = (ticked > e.due ? ticked : e.due) === day; }
+      else show = day === today ? e.due <= today : e.due === day && day > today;
+      if (show) out.push({ list: l, entry: e });
+    }));
+    return out;
+  };
+  T.count = day => T.forDay(day).length + T.listEntries(day).length;
+  T.leftCount = day => Pz.data.todos.filter(t => t.date === day && !t.done).length + T.listEntries(day).filter(x => !x.entry.done).length;
   const isAuto = t => !!(t.source && t.source.type === 'auto');
 
   T.add = (title, day) => {
@@ -92,22 +107,37 @@
     });
   }
 
-  function addRow(day) {
+  // A list to-do showing in a day list: tagged with its list's name and colour.
+  function listRow(x, day) {
+    const e = x.entry, l = x.list;
+    const el = h('div', { class: 'todo-row' + (e.done ? ' done' : ''), role: 'button', onclick: () => Pz.lists.editEntry(e.id) }, [
+      h('button', { type: 'button', class: 'todo-check', role: 'checkbox', 'aria-checked': String(e.done), 'aria-label': e.title,
+        onclick: ev => { ev.stopPropagation(); Pz.lists.toggle(e); Pz.app.changed(); } }, [Pz.icon('check', 14)]),
+      h('div', { class: 'main' }, [h('div', { class: 'ttl', text: e.title }), h('div', { class: 'todo-chips' }, [
+        h('span', { class: 'todo-chip' }, [h('i', { style: { background: l.color } }), h('span', { text: l.name + (e.dueTime ? ' · ' + e.dueTime : '') })]),
+        !e.done && e.due < day && h('span', { class: 'todo-chip' }, [h('span', { text: '→ Carried over from ' + D.dayName(e.due).slice(0, 3) })])
+      ])])
+    ]);
+    return ui.swipeRow(el, () => Pz.lists.deleteEntry(e.id));
+  }
+
+  // "where" names the place the row is drawn (today / day / panel), so the typing cursor returns to the right one.
+  function addRow(day, where) {
     const input = h('input', { type: 'text', placeholder: 'Add a to-do', 'aria-label': 'Add a to-do', enterkeyhint: 'done', autocomplete: 'off' });
     const commit = stay => {
       const v = input.value; input.value = '';
       if (!v.trim()) return;
-      if (stay) focusDay = day;
+      if (stay) focusDay = day + where;
       T.add(v, day); Pz.app.changed();
     };
     input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); commit(true); } });
     input.addEventListener('blur', () => commit(false));
-    if (focusDay === day) { focusDay = null; setTimeout(() => input.focus(), 0); }
+    if (focusDay === day + where) { focusDay = null; setTimeout(() => input.focus(), 0); }
     return h('label', { class: 'todo-add' }, [h('span', { class: 'plus' }, [Pz.icon('plus', 16)]), input]);
   }
 
-  // All the rows for a day (to-dos, then the "add" row).
-  T.rows = day => T.forDay(day).map(row).concat([addRow(day)]);
+  // All the rows for a day: day to-dos, list to-dos due that day, then the "add" row.
+  T.rows = (day, where) => T.forDay(day).map(row).concat(T.listEntries(day).map(x => listRow(x, day)), [addRow(day, where || '')]);
 
   // Rename a to-do or move it to another day.
   function openEdit(t) {

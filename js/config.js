@@ -5,10 +5,10 @@ window.Pz = window.Pz || {};   // "Pz" is the one shared box all our files put t
 
 Pz.config = {
   appName: 'Pandatize',
-  version: '0.2.0',
-  buildStep: 2,
+  version: '0.3.2',
+  buildStep: 3,
   storageKey: 'pandatize-data',   // the label our data is saved under on the device
-  dataVersion: 1,                 // raise this (and write a converter in storage.js) if the data format changes
+  dataVersion: 2,                 // raise this (and write a converter in storage.js) if the data format changes
 
   // The 12-colour palette (DESIGN.md section 4)
   palette: [

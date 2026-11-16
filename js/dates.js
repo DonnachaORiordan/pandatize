@@ -16,6 +16,8 @@
   D.toDate = dt => { const d = D.parse(dt); if (dt.length > 10) d.setHours(+dt.slice(11, 13), +dt.slice(14, 16)); return d; };
   D.today = () => D.ymd(new Date());
   D.nowMin = () => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); };
+  D.nowDT = () => D.today() + 'T' + D.fromMin(D.nowMin());      // this very minute, e.g. "2026-11-17T19:30"
+  D.duration = m => m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '');   // "40 min", "1 h 40 min"
   D.addDays = (s, n) => { const d = D.parse(s); d.setDate(d.getDate() + n); return D.ymd(d); };
   D.addMonths = (s, n) => { const d = D.parse(s); d.setDate(1); d.setMonth(d.getMonth() + n); return D.ymd(d); };
   D.dow = s => { const g = D.parse(s).getDay(); return g === 0 ? 7 : g; };          // Mon = 1 … Sun = 7

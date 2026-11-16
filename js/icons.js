@@ -28,7 +28,24 @@
     speaker: '<path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4zM16 9a4.5 4.5 0 010 6M18.5 6.5a8 8 0 010 11"/>',
     archive: '<path d="M4 5h16v4H4zM5.5 9v10.5h13V9M10 13h4"/>',
     download: '<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/>',
-    upload: '<path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 19.5h14"/>'
+    upload: '<path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 19.5h14"/>',
+    // List icons
+    book: '<path d="M5 4.5h10a3 3 0 013 3v12H8a3 3 0 01-3-3zM5 16.5a3 3 0 013-3h10M9 8.5h5"/>',
+    cart: '<path d="M3 4.5h2.5l2.2 10h9.8l2-7H7"/><circle cx="9" cy="19" r="1.3"/><circle cx="16.5" cy="19" r="1.3"/>',
+    bulb: '<path d="M9.5 17.5h5M10 21h4M9.5 17.5v-1.6c0-.8-.4-1.5-1-2a6 6 0 117 0c-.6.5-1 1.2-1 2v1.6"/>',
+    note: '<path d="M6 3.5h8l4 4v13H6zM14 3.5v4h4M9 12h6M9 16h4"/>',
+    star: '<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/>',
+    home: '<path d="M4 11l8-7 8 7M6 9.5V20h12V9.5M10 20v-5h4v5"/>',
+    heart: '<path d="M12 20.5C5 16 3.5 12 3.5 9A4.5 4.5 0 0112 7a4.5 4.5 0 018.5 2c0 3-1.5 7-8.5 11.5z"/>',
+    briefcase: '<rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V5h6v2.5M3.5 13h17"/>',
+    gift: '<rect x="4" y="10" width="16" height="10.5" rx="1.5"/><path d="M3 7h18v3H3zM12 7v13.5M12 7c-1.5-3-5-3.5-5-1.5S9.5 7 12 7zM12 7c1.5-3 5-3.5 5-1.5S14.5 7 12 7z"/>',
+    plane: '<path d="M3 11.5l18-7.5-7.5 18-2.5-8zM11 14l10-10"/>',
+    music: '<path d="M9 18V5.5l10-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
+    // Small extras
+    dots: '<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
+    tack: '<path d="M9 3.5h6l-1 6 3 3.5H7l3-3.5zM12 13v7.5"/>',
+    tackFill: '<path d="M9 3.5h6l-1 6 3 3.5H7l3-3.5z" fill="currentColor"/><path d="M12 13v7.5"/>',
+    flagFill: '<path d="M6 4.5h11l-2.2 4 2.2 4H6z" fill="currentColor"/><path d="M6 21V4"/>'
   };
 
   Pz.icon = function (name, size) {

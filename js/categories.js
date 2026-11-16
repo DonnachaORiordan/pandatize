@@ -175,9 +175,15 @@
       const mine = Pz.data.items.filter(it => it.categoryId === c.id);
       const others = C.all().filter(o => o.id !== c.id);
       const finish = toId => {
+        const at = C.all().indexOf(c);
         mine.forEach(it => { it.categoryId = toId; });
         Pz.data.categories = C.all().filter(o => o.id !== c.id);
         openId = null; save(); render();
+        ui.toast('Deleted “' + c.name + '”', 'Undo', () => {          // Undo: the category comes back, and so do its items
+          C.all().splice(Math.min(at, C.all().length), 0, c);
+          mine.forEach(it => { it.categoryId = c.id; });
+          save(); render(); Pz.app.changed();
+        });
       };
       if (mine.length) {
         ui.actions({ title: 'Delete “' + c.name + '”?', message: 'Choose the category its ' + mine.length + (mine.length === 1 ? ' item moves' : ' items move') + ' to.', left: true,

@@ -1,0 +1,97 @@
+/* lists.css – build step 3: the Lists tab (all lists, inside a list, the list and
+   entry sheets) and the Today tab (Now/next card, Schedule, Countdowns). */
+
+.tab-page { position: relative; }
+.today section { margin-top: 24px; }          /* 24px between sections (DESIGN.md section 5) */
+.quiet { color: var(--text2); font-size: 14px; margin: 0 4px; }
+.dragging { z-index: 5; position: relative; box-shadow: 0 12px 30px rgba(0,0,0,.35); transition: none !important; opacity: .96; }
+[data-reorder] { -webkit-touch-callout: none; }
+
+/* ---------- All lists ---------- */
+.list-sq { width: 44px; height: 44px; border-radius: 13px; }
+.list-card { display: flex; align-items: center; gap: 12px; padding: 14px; margin-bottom: 12px; cursor: pointer; }
+.list-card .main { flex: 1; min-width: 0; }
+.list-card .name { font-size: 17px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list-card .sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+.list-card .due { font-size: 13px; font-weight: 600; color: var(--orange); margin-top: 2px; }
+.res-row .sq { width: 32px; height: 32px; border-radius: 10px; }
+
+/* New list / edit list sheet */
+.swatches, .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px 8px; justify-items: center; }
+.swatch { width: 38px; height: 38px; border-radius: 50%; }
+.swatch.on { box-shadow: 0 0 0 3px var(--sheet), 0 0 0 5px var(--text); }
+.icon-grid button { width: 46px; height: 46px; border-radius: 14px; background: var(--field); display: flex; align-items: center; justify-content: center; color: var(--text2); }
+
+/* ---------- Inside a list ---------- */
+.list-detail { padding-bottom: calc(var(--tabbar-space) + 64px); }
+.list-title { display: flex; align-items: center; gap: 12px; margin: 6px 0 16px; }
+.list-title h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; min-width: 0; overflow-wrap: anywhere; }
+.entry-wrap { border-radius: 18px; margin-bottom: 10px; box-shadow: var(--shadow); }
+.entry-card { display: flex; align-items: flex-start; gap: 12px; padding: 14px; background: var(--card); cursor: pointer; }
+.entry-card .main { flex: 1; min-width: 0; padding-top: 2px; }
+.entry-card .ttl { font-weight: 600; overflow-wrap: anywhere; }
+.entry-card .meta { font-size: 13px; color: var(--text2); margin-top: 3px; }
+.entry-card .meta.overdue { color: var(--red); }
+.entry-card .side { display: flex; align-items: center; gap: 8px; padding-top: 4px; flex: none; }
+.entry-card.done .ttl { text-decoration: line-through; color: var(--text2); }
+.note-ic { width: 24px; display: flex; justify-content: center; color: var(--text2); padding-top: 2px; flex: none; }
+.note-body { font-size: 14px; color: var(--text2); margin-top: 3px; white-space: pre-line; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+.subs { margin-top: 8px; display: flex; flex-direction: column; gap: 2px; }
+.sub-row { display: flex; align-items: center; gap: 9px; min-height: 30px; font-size: 14px; width: 100%; }
+.sub-check { width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid var(--check); display: flex; align-items: center; justify-content: center; color: transparent; flex: none; }
+.sub-row.done .sub-check { background: var(--text2); border-color: var(--text2); color: var(--card); }
+.sub-row.done span:last-child { text-decoration: line-through; color: var(--text2); }
+.todo-check.small { width: 22px; height: 22px; }
+.todo-check.small.on { background: var(--text); border-color: var(--text); color: var(--on-text); }
+.notes-box.tall { min-height: 220px; }
+
+/* The Note / + To-do buttons, bottom right above the tab bar */
+.fab-row { position: absolute; right: 16px; bottom: calc(max(24px, var(--safe-bottom)) + 76px); display: flex; gap: 8px; z-index: 5; }
+.fab { display: flex; align-items: center; gap: 6px; min-height: 46px; padding: 0 18px 0 14px; border-radius: 999px; background: var(--card); font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.28); border: 1px solid var(--hair); }
+.fab.filled { background: var(--text); color: var(--on-text); border-color: transparent; }
+
+/* To-do rows in a day list: the tags under the title */
+.todo-chips { display: flex; flex-wrap: wrap; gap: 0 6px; }
+
+/* ---------- Today ---------- */
+.today-day { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+.now-card { overflow: hidden; }
+.nn-main { padding: 16px; cursor: pointer; }
+.nn-top { display: flex; align-items: center; gap: 10px; }
+.nn-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: .05em; border-radius: 999px; padding: 4px 10px 4px 8px; }
+.nn-pill i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.nn-pill.plain { background: var(--card2); color: var(--text2); }
+.nn-cat { font-size: 13px; color: var(--text2); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nn-right { font-size: 13px; color: var(--text2); white-space: nowrap; margin-left: auto; }
+.nn-title { font-size: 21px; font-weight: 700; margin-top: 10px; overflow-wrap: anywhere; }
+.nn-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 6px; font-size: 14px; color: var(--text2); }
+.nn-meta > span { display: inline-flex; align-items: center; gap: 5px; min-width: 0; }
+.nn-progress { height: 4px; border-radius: 2px; background: var(--card2); margin-top: 14px; overflow: hidden; }
+.nn-progress i { display: block; height: 100%; border-radius: 2px; }
+.nn-next { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--hair); cursor: pointer; font-size: 14px; }
+.nn-next .lbl { font-size: 11px; font-weight: 800; letter-spacing: .05em; color: var(--text2); }
+.nn-next i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.nn-next .ttl { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nn-none { padding: 22px 16px; text-align: center; color: var(--text2); }
+
+.sched-card { padding: 0 10px 0 0; overflow: hidden; }
+.sched-crop { overflow: hidden; }
+.ad-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 2px 10px; }
+.ad-chips .ad-pill { width: auto; max-width: 100%; border-radius: 999px; padding: 5px 12px; font-size: 13px; text-overflow: ellipsis; }
+
+.cd-strip { display: flex; gap: 10px; overflow-x: auto; margin: 0 -16px; padding: 2px 16px 6px; }
+#tabs-viewport .cd-strip, #tabs-viewport .cd-strip * { touch-action: pan-x pan-y; }     /* this strip scrolls sideways itself */
+.cd-card { flex: none; width: 156px; border-radius: 22px; background: var(--card); box-shadow: var(--shadow); padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+.cd-when { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2); }
+.cd-when i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.cd-big { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+.cd-title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd-card.orange { background: var(--orange-bg); }
+.cd-card.orange .cd-big, .cd-card.orange .cd-when { color: var(--orange); }
+.cd-card.red { background: var(--red-bg); }
+.cd-card.red .cd-big, .cd-card.red .cd-when { color: var(--red); }
+
+/* Quick pin button (top right of note and to-do cards inside a list) */
+.pin-btn { width: 32px; height: 32px; margin: -6px -4px -6px 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text2); flex: none; position: relative; align-self: flex-start; }
+.pin-btn::after { content: ''; position: absolute; inset: -6px; }
+.pin-btn.on { color: var(--text); }

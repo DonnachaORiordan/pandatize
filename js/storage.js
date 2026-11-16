@@ -78,7 +78,7 @@
       //   source: null, or for an auto-task { type: 'auto', itemId, occ (which occurrence), eventTitle, appear (date), frequency } }
       todos: [],
 
-      // Lists (step 3). Each list: { id, name, color, icon, entries: [ … ] }. Each entry:
+      // Lists. Each list: { id, name, color, icon, entries: [ … ] }. Each entry:
       // { id, kind: 'todo' | 'note', title, body, done, doneAt, due, dueTime,
       //   priority: null | 'low' | 'medium' | 'high', subtasks: [{ id, title, done }], pinned, created, updated }
       lists: startingLists(),
@@ -92,7 +92,11 @@
 
   // Converters: if dataVersion ever goes up, add a function here that turns the
   // old format into the next one, e.g.  1: data => { …change…; data.dataVersion = 2; return data; }
-  const converters = {};
+  const converters = {
+    // Version 1 → 2: for a short while lists could be pinned; that was removed again.
+    // Nothing needs converting (the leftover "pinned" on a list is cleared in upgrade() below).
+    1: data => { data.dataVersion = 2; return data; }
+  };
 
   function upgrade(data) {
     while (data.dataVersion < cfg.dataVersion && converters[data.dataVersion]) {
@@ -102,6 +106,7 @@
     const fresh = freshData();
     Object.keys(fresh).forEach(k => { if (data[k] === undefined) data[k] = fresh[k]; });
     Object.keys(fresh.settings).forEach(k => { if (data.settings[k] === undefined) data.settings[k] = fresh.settings[k]; });
+    data.lists.forEach(l => { delete l.pinned; });        // lists can't be pinned (only the notes and to-dos inside them)
     return data;
   }
 
