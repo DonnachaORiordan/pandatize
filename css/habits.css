@@ -1,0 +1,133 @@
+/* habits.css – build step 4: habit cards and tiles, the progress bar, the week strip,
+   the add/edit habit sheet, and the Progress graph screen. */
+
+:root { --tint: 30%; --miss: #000000; }                       /* a done card gets 30% of its colour (dark mode) */
+@media (prefers-color-scheme: light) { :root { --tint: 16%; --miss: #FFFFFF; } }     /* …and 16% mixed into white (light mode) */
+
+/* ---------- Shared habit pieces ---------- */
+.habit-ic { border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.habit-tick { border: 2px solid; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex: none; position: relative; }
+.habit-tick::after { content: ''; position: absolute; inset: -8px; }
+.flame { color: #FF9F0A; display: inline-flex; }
+.h-sub { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text2); margin-top: 3px; }
+.pips { display: inline-flex; gap: 3px; }
+.pips i { width: 7px; height: 7px; border-radius: 50%; background: var(--card2); box-shadow: inset 0 0 0 1px var(--check); }
+.pips i.on { background: var(--hc); box-shadow: none; }
+.h-strip { display: flex; gap: 3px; margin-top: 12px; }
+.h-strip i { flex: 1; max-width: 13px; aspect-ratio: 1; border-radius: 4px; background: var(--card2); }
+.h-strip i.done { background: var(--hc); }
+.h-strip i.missed { background: color-mix(in srgb, var(--hc) 34%, var(--miss)); }
+.h-strip i.today { background: none; box-shadow: inset 0 0 0 1.5px var(--hc); }
+.h-strip i.neutral { background: var(--card2); opacity: .75; }
+
+/* ---------- Progress bar ---------- */
+.progress-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: var(--text2); margin: 0 2px 8px; }
+.progress-top span:last-child { color: var(--text); }
+.progress-track { height: 8px; border-radius: 4px; background: var(--card2); display: flex; gap: 2px; overflow: hidden; }
+.progress-track i { height: 100%; border-radius: 4px; flex: none; }
+.progress-track i.sliver { width: 3%; background: var(--check); }
+.today .progress { margin-top: 18px; }
+
+/* ---------- Habits tab ---------- */
+.hweek { display: flex; align-items: center; gap: 2px; margin: 18px -6px 0; }
+.hw-arrow { width: 26px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--text2); flex: none; }
+.hw-days { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.hw-days button { border-radius: 14px; min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 16px; font-weight: 600; }
+.hw-days small { font-size: 11px; font-weight: 600; color: var(--text2); }
+.hw-days .mini { width: 18px; height: 3px; border-radius: 2px; background: var(--card2); overflow: hidden; margin-top: 3px; }
+.hw-days .mini i { display: block; height: 100%; background: var(--text); border-radius: 2px; }
+.hw-days .future { opacity: .45; }
+.hw-days .today:not(.on) span { color: var(--accent); }
+.hw-days .on { background: var(--text); color: var(--on-text); opacity: 1; }
+.hw-days .on small { color: inherit; opacity: .7; }
+.hw-days .on .mini { background: color-mix(in srgb, var(--on-text) 25%, transparent); }
+.hw-days .on .mini i { background: var(--on-text); }
+.tick-banner { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--card2); border-radius: 14px; padding: 8px 14px; margin-top: 12px; font-size: 14px; font-weight: 600; }
+.tick-banner .link { font-size: 14px; min-height: 28px; }
+.habit-cards { margin-top: 16px; }
+.habit-card { padding: 14px; margin-bottom: 12px; cursor: pointer; }
+.habit-card.done, .habit-tile.done { background: color-mix(in srgb, var(--hc) var(--tint), var(--card)); }
+.habit-card.preview { cursor: default; margin: 14px 0 0; }
+.sheet .habit-card.preview { background: var(--field); }
+.hc-top { display: flex; align-items: center; gap: 12px; }
+.hc-top .main { flex: 1; min-width: 0; }
+.hc-title { font-size: 17px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empty-card .btn-row { margin-top: 18px; flex-direction: column; }
+.empty-card .btn-row button { color: var(--text); min-height: 48px; }
+.empty-card .btn-row button:first-child { background: var(--text); color: var(--on-text); }
+.arch-card { padding: 14px; margin-bottom: 12px; }
+
+/* ---------- Compact tiles (Today) ---------- */
+.tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.habit-tile { padding: 12px; border-radius: 14px; min-width: 0; cursor: pointer; }
+.ht-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.ht-top .habit-ic { border-radius: 10px; }
+.ht-top .habit-tick { border-radius: 9px; }
+.ht-title { font-weight: 700; margin-top: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.habit-tile .h-strip { margin-top: 10px; gap: 4px; }
+.habit-tile.all { border: 1.5px dashed var(--check); color: var(--text2); font-weight: 600; display: flex; align-items: center; justify-content: center; min-height: 120px; text-align: center; }
+
+/* ---------- Add / edit habit sheet ---------- */
+.swatches.seven { grid-template-columns: repeat(7, 1fr); }
+.swatches.seven .swatch { width: 36px; height: 36px; }
+.swatch.wheel { background: conic-gradient(#FF453A, #FF9F0A, #FFD60A, #30D158, #3BC9F5, #0A84FF, #BF5AF2, #FF4FA3, #FF453A); position: relative; overflow: hidden; display: block; cursor: pointer; }
+.swatch.wheel::after { content: ''; position: absolute; inset: 9px; border-radius: 50%; background: var(--sheet); pointer-events: none; }
+.swatch.wheel input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; cursor: pointer; }
+
+/* ---------- Progress (graph) screen ---------- */
+.graph-card { padding: 16px; }
+.graph-nav { display: flex; align-items: center; justify-content: space-between; font-weight: 700; }
+.graph-nav .round-btn { background: var(--card2); box-shadow: none; }
+.graph-nav .round-btn:disabled { opacity: .3; }
+.big-num { font-size: 44px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin-top: 16px; }
+.big-sub { font-size: 14px; color: var(--text2); margin-top: 4px; }
+.compare { font-size: 14px; font-weight: 600; color: #30D158; margin-top: 6px; }
+.compare.down { color: var(--red); }
+@media (prefers-color-scheme: light) { .compare { color: #1E8E3E; } }
+.chart { margin-top: 18px; }
+.chart-main { display: flex; height: 150px; }
+.y-axis { position: relative; width: 38px; flex: none; }
+.y-axis span { position: absolute; left: 0; transform: translateY(-50%); font-size: 11px; color: var(--text2); }
+.plot { position: relative; flex: 1; min-width: 0; touch-action: pan-y; }
+.plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.plot .grid { stroke: var(--text2); stroke-opacity: .3; stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+.plot .line { fill: none; stroke: var(--text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.plot .area { fill: var(--text); fill-opacity: .08; stroke: none; }
+.plot .dot { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--text); box-shadow: 0 0 0 2px var(--card); pointer-events: none; }
+.plot .dot.small { width: 6px; height: 6px; margin: -3px 0 0 -3px; box-shadow: none; }
+.plot .dot.hover { background: var(--accent); }
+.plot .rule { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--text2); opacity: .5; pointer-events: none; }
+.plot .tip { position: absolute; top: -8px; transform: translate(-50%, -100%); background: var(--text); color: var(--on-text); font-size: 12px; font-weight: 700; border-radius: 8px; padding: 4px 8px; white-space: nowrap; pointer-events: none; z-index: 2; }
+.x-axis { position: relative; height: 18px; margin: 6px 0 0 38px; }
+.x-axis span { position: absolute; transform: translateX(-50%); font-size: 11px; color: var(--text2); }
+.ph-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.ph-row + .ph-row { border-top: 1px solid var(--hair); }
+.ph-row .main { flex: 1; min-width: 0; }
+.ph-row .habit-ic { border-radius: 10px; }
+.ph-top { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
+.ph-top span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-top span:last-child { color: var(--text2); font-weight: 500; white-space: nowrap; }
+.ph-bar { height: 4px; border-radius: 2px; background: var(--card2); margin-top: 7px; overflow: hidden; }
+.ph-bar i { display: block; height: 100%; border-radius: 2px; }
+
+/* Inside a sheet the card behind is lighter, so the "no tick" squares need a lighter grey to show */
+.sheet .h-strip i:not(.done):not(.missed):not(.today), .sheet .pips i:not(.on) { background: var(--pill); }
+
+/* Light mode: a missed day is a white square with a soft outline, so it still shows on a colour-filled card */
+@media (prefers-color-scheme: light) {
+  .h-strip i.missed { background: #FFFFFF; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--hc) 45%, #FFFFFF); }
+}
+
+/* Year graph: month names at a slant so all twelve fit (each one ends under its place on the graph) */
+.x-axis.slant { height: 38px; }
+.x-axis.slant span { transform-origin: top right; transform: translateX(-100%) rotate(-45deg); margin-left: 5px; white-space: nowrap; }
+
+/* Light mode: the grey "nothing to do that day" squares (days before the habit existed, or a weekly
+   habit's days off) darken whatever is behind them, so they show on a white card AND on a colour-filled one */
+@media (prefers-color-scheme: light) {
+  .h-strip i, .h-strip i.neutral { background: rgba(0, 0, 0, 0.14); opacity: 1; }
+  .h-strip i.done { background: var(--hc); }
+  .h-strip i.today { background: none; }
+  .h-strip i.missed { background: #FFFFFF; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--hc) 60%, #FFFFFF); }
+  .sheet .h-strip i:not(.done):not(.missed):not(.today) { background: rgba(0, 0, 0, 0.14); }
+}

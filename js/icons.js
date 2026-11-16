@@ -41,6 +41,18 @@
     gift: '<rect x="4" y="10" width="16" height="10.5" rx="1.5"/><path d="M3 7h18v3H3zM12 7v13.5M12 7c-1.5-3-5-3.5-5-1.5S9.5 7 12 7zM12 7c1.5-3 5-3.5 5-1.5S14.5 7 12 7z"/>',
     plane: '<path d="M3 11.5l18-7.5-7.5 18-2.5-8zM11 14l10-10"/>',
     music: '<path d="M9 18V5.5l10-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
+    // Habit icons (book, music and heart are above)
+    dumbbell: '<path d="M3 9.5v5M6 7v10M18 7v10M21 9.5v5M6 12h12"/>',
+    pawn: '<circle cx="12" cy="6.5" r="3"/><path d="M9.5 9.5h5M10.5 9.5c0 4-2.5 5-3 8h9c-.5-3-3-4-3-8M6.5 20.5h11"/>',
+    moon: '<path d="M19.5 14.5A8 8 0 019.5 4.5a8 8 0 1010 10z"/>',
+    stretch: '<circle cx="12" cy="4.5" r="2"/><path d="M4.5 7.5l7.5 2 7.5-2M12 9.5v6M12 15.5l-4 5.5M12 15.5l4 5.5"/>',
+    drop: '<path d="M12 3.5s6 6.2 6 10.5a6 6 0 01-12 0c0-4.3 6-10.5 6-10.5z"/>',
+    pen: '<path d="M4 20l1-4.5L16.5 4a2.1 2.1 0 013 3L8 18.5zM14.5 6l3 3"/>',
+    leaf: '<path d="M5 19c0-9 5-14 14.5-14.5C19 14 14 19 5 19zM5 19l7-7"/>',
+    coffee: '<path d="M5 9.5h11v5a5 5 0 01-5 5h-1a5 5 0 01-5-5zM16 10.5h1.5a2.5 2.5 0 010 5H16M8 3.5v2.5M12 3.5v2.5"/>',
+    code: '<path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5"/>',
+    flame: '<path d="M12 3c.5 3 4.5 5 4.5 10a4.5 4.5 0 01-9 0c0-1.8.8-3 1.8-4 .2 1.5 1 2.3 1.7 2.5C11 9.5 10.5 6 12 3z" fill="currentColor"/>',
+    graph: '<path d="M4 19.5h16M5 15l4-4.5 3.5 3L19 6.5"/>',
     // Small extras
     dots: '<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
     tack: '<path d="M9 3.5h6l-1 6 3 3.5H7l3-3.5zM12 13v7.5"/>',

@@ -18,7 +18,7 @@
       h('div', { class: 'group' }, [row('tag', 'Categories', chev(), Pz.categories.openScreen)]),
       h('div', { class: 'group' }, [
         row('speaker', 'Sounds', ui.toggle(Pz.data.settings.sounds, on => { Pz.data.settings.sounds = on; Pz.storage.save(); })),
-        row('archive', 'Archived habits', chev(), later('Archived habits', 4))
+        row('archive', 'Archived habits', chev(), () => Pz.habitsView.openArchived())
       ]),
       h('div', { class: 'group' }, [
         row('upload', 'Export backup', null, later('Export', 5)),

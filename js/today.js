@@ -5,20 +5,18 @@
 (function () {
   const D = Pz.dates, ui = Pz.ui, h = ui.h, I = Pz.items;
   const HOUR = 44;            // height of one hour on the Schedule timeline
-  let dateBox, nowBox, schedBox, todoBox, countBox, today = null;
+  let dateBox, progBox, nowBox, schedBox, todoBox, habitBox, countBox, today = null;
 
   const openOcc = o => Pz.itemSheet.open({ id: o.item.id, key: o.key });
   const head = (title, right) => h('div', { class: 'sec-head' }, [h('h2', { text: title }), right]);
   const openDay = () => { Pz.nav.go('calendar'); Pz.calendar.goDay(D.today()); };
 
   function init(page) {
-    dateBox = h('div'); nowBox = h('section'); schedBox = h('section'); todoBox = h('section'); countBox = h('section');
+    dateBox = h('div'); progBox = h('div'); nowBox = h('section'); schedBox = h('section'); todoBox = h('section'); habitBox = h('section'); countBox = h('section');
     page.appendChild(h('div', { class: 'page-scroll today' }, [
       h('div', { class: 'title-row', style: { marginBottom: '0', alignItems: 'flex-start' } }, [dateBox,
         h('div', { class: 'cal-btns', style: { marginTop: '10px' } }, [Pz.reminders.bell(), ui.roundBtn('gear', 'Settings', Pz.settings.open, 'big')])]),
-      nowBox, schedBox, todoBox,
-      h('section', null, [head('Habits'), h('div', { class: 'card empty-card', text: 'Your habit tiles arrive in build step 4.' })]),
-      countBox
+      progBox, nowBox, schedBox, todoBox, habitBox, countBox
     ]));
     refresh();
   }
@@ -89,6 +87,16 @@
     todoBox.appendChild(h('div', { class: 'card', style: { padding: '2px 6px' } }, Pz.todos.rows(today, 'today')));
   }
 
+  // ---- Habits: the daily-habits progress bar (under the header) and the compact tiles ----
+  function renderHabits() {
+    const H = Pz.habits, shown = H.shown();
+    progBox.innerHTML = ''; habitBox.innerHTML = '';
+    const bar = Pz.habitsView.progressBar(today, 'Daily habits');
+    if (bar) progBox.appendChild(bar);
+    habitBox.appendChild(head('Habits', h('span', { text: shown.length ? shown.filter(x => H.isDone(x, today)).length + ' of ' + shown.length : '' })));
+    habitBox.appendChild(shown.length ? Pz.habitsView.tiles() : Pz.habitsView.emptyState());
+  }
+
   // ---- Countdowns: a strip of cards that scrolls sideways ----
   function renderCountdowns() {
     countBox.innerHTML = '';
@@ -111,7 +119,7 @@
   // Everything (after data changes, or on a new day).
   function refresh() {
     today = D.today();
-    renderDate(); renderNow(); renderSchedule(); renderTodos(); renderCountdowns();
+    renderDate(); renderNow(); renderSchedule(); renderTodos(); renderHabits(); renderCountdowns();
   }
   // Every minute: only the parts that depend on the clock (so typing a to-do isn't interrupted).
   function tick() {

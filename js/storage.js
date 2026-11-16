@@ -48,8 +48,9 @@
       app: 'pandatize',
       dataVersion: cfg.dataVersion,
 
-      // Habits (step 4). Each: { id, title, color, icon, freq: { type: 'daily' | 'weekly', times: 3 },
-      //   created: 'YYYY-MM-DD', archived: false, done: ['YYYY-MM-DD', …] }  – the list order is the display order
+      // Habits. Each: { id, title, color, icon, freq: { type: 'daily' | 'weekly', times: 3 },
+      //   created: 'YYYY-MM-DD', archived: false, done: ['YYYY-MM-DD', …], best: 12 (longest streak remembered) }
+      //   – the list order is the display order
       habits: [],
       // Celebrations already shown: milestones = { habitId: [7, 30] }, perfectDays = ['YYYY-MM-DD', …]
       habitMeta: { milestones: {}, perfectDays: [] },
