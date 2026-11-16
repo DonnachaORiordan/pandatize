@@ -1,0 +1,143 @@
+/* calendar.css – the Calendar tab: shared header, Month, Week, Day, Agenda,
+   the day panel and the add/edit item sheet (DESIGN.md sections 7 and 8). */
+
+/* ---------- Shared header ---------- */
+.cal-head { flex: none; padding: 4px 16px 0; }
+.cal-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 44px; }
+.cal-nav { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.cal-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; padding: 4px 2px; min-width: 0; }
+.cal-title.long { font-size: 20px; }
+.cal-title.day { font-size: 30px; }
+.cal-title .yr { color: var(--text2); }
+.cal-btns { display: flex; gap: 8px; flex: none; }
+.cal-head .seg { margin-top: 10px; }
+.cal-view { flex: 1; min-height: 0; margin-top: 12px; }
+.cal-view.month, .cal-view.agenda { overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: var(--tabbar-space); }
+.cal-view.week, .cal-view.day { display: flex; flex-direction: column; }
+.cal-view.month.panel-open { padding-bottom: 62vh; }
+
+/* ---------- Month: the "open grid" ---------- */
+.month-letters { display: grid; grid-template-columns: repeat(7, 1fr); margin: 12px 0 0; font-size: 12px; font-weight: 600; color: var(--text2); text-align: center; }
+.month-card { background: var(--card); border-radius: 22px; padding: 4px; margin: 0 12px; box-shadow: var(--shadow); }
+.month-row { display: grid; grid-template-columns: repeat(7, 1fr); }
+.month-row + .month-row { border-top: 1px solid var(--hair); }
+.month-day { height: 80px; min-width: 0; display: flex; flex-direction: column; align-items: center; padding: 4px 3px 0; position: relative; }
+.month-day .num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex: none; }
+.month-day.today .num { background: var(--text); color: var(--on-text); }
+.month-day.sel .num { box-shadow: 0 0 0 2px var(--text); }
+.month-day.today.sel .num { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--text); }
+.month-day.out { opacity: .35; }
+.month-day .lines { width: 100%; display: flex; flex-direction: column; gap: 3px; margin-top: 5px; }
+.month-day .lines i { display: block; height: 4px; border-radius: 2px; }
+.month-day .lines i.done { opacity: .35; }
+
+/* ---------- Day panel (slides up when you tap a day) ---------- */
+.day-panel {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 20; max-height: 58%;
+  background: var(--sheet); border-radius: 28px 28px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.35);
+  transform: translateY(105%); transition: transform .32s cubic-bezier(.2,.8,.2,1);
+  display: flex; flex-direction: column;
+}
+.day-panel.open { transform: none; }
+.panel-grab { flex: none; padding-bottom: 6px; cursor: grab; touch-action: none; }
+.panel-head { display: flex; align-items: flex-start; gap: 10px; padding: 0 18px 10px; flex: none; }
+.panel-title { font-size: 20px; font-weight: 800; }
+.panel-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+.panel-list { overflow-y: auto; min-height: 0; padding: 0 10px calc(20px + var(--safe-bottom)); }
+.panel-empty { color: var(--text2); font-size: 14px; padding: 14px 8px 20px; }
+
+/* ---------- Item rows (day panel and agenda) ---------- */
+.item-row { display: flex; align-items: center; gap: 10px; padding: 9px 8px; min-height: 54px; width: 100%; cursor: pointer; }
+.item-row .bar { width: 4px; align-self: stretch; border-radius: 2px; flex: none; margin: 2px 0; }
+.item-row .flag-btn { width: 28px; height: 28px; border-radius: 8px; flex: none; display: flex; align-items: center; justify-content: center; position: relative; }
+.item-row .flag-btn::after { content: ''; position: absolute; inset: -8px; }
+.item-row .when { width: 46px; flex: none; font-size: 14px; font-weight: 700; }
+.item-row .when small { display: block; font-weight: 500; font-size: 11px; color: var(--text2); }
+.item-row .main { flex: 1; min-width: 0; }
+.item-row .ttl { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-row .sub { font-size: 13px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 1px; }
+.item-row.done { opacity: .5; }
+.item-row.done .ttl { text-decoration: line-through; }
+.swipe-row + .swipe-row { border-top: 1px solid var(--hair); }
+
+/* ---------- Agenda ---------- */
+.agenda { padding: 0 16px; }
+.agenda-h { font-size: 14px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .03em; margin: 18px 4px 8px; }
+.agenda-h:first-child { margin-top: 4px; }
+.agenda .card { padding: 2px 6px; overflow: hidden; }
+.empty-card { padding: 28px 20px; text-align: center; color: var(--text2); font-size: 14px; }
+.empty-card b { display: block; color: var(--text); font-size: 17px; margin-bottom: 4px; }
+
+/* ---------- Mini week strip (Day view) ---------- */
+.week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; }
+.week-strip button { border-radius: 14px; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 16px; font-weight: 600; }
+.week-strip small { font-size: 11px; font-weight: 600; color: var(--text2); }
+.week-strip .today { color: var(--accent); }
+.week-strip .on { background: var(--text); color: var(--on-text); }
+.week-strip .on small { color: inherit; opacity: .7; }
+
+/* ---------- Time grid (Week and Day) ---------- */
+.tg-card { margin: 0 16px var(--tabbar-space); background: var(--card); border-radius: 22px; box-shadow: var(--shadow); flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.cal-view.week .tg-card { margin-left: 12px; margin-right: 12px; }
+.tg-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 10px 8px 10px 0; }
+.tg { position: relative; display: flex; }
+.tg-hours { position: relative; flex: none; width: 46px; }
+.tg-hours span { position: absolute; right: 8px; transform: translateY(-50%); font-size: 11px; color: var(--text2); }
+.tg-cols { flex: 1; min-width: 0; display: flex; position: relative; background: repeating-linear-gradient(to bottom, var(--hair) 0, var(--hair) 1px, transparent 1px, transparent var(--hour)); }
+.tg-col { flex: 1; min-width: 0; position: relative; }
+.tg.compact .tg-hours { width: 34px; }
+.tg.compact .tg-hours span { right: 5px; font-size: 10px; }
+.tg.compact .tg-col + .tg-col { border-left: 1px solid var(--hair); }
+.tg.compact .tg-col.today { background: rgba(127,127,127,.10); }
+
+.ev { position: absolute; border-radius: 8px; padding: 3px 7px; overflow: hidden; font-size: 11px; line-height: 1.25; z-index: 1; }
+.ev b { display: block; font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ev span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .85; }
+.ev.short { display: flex; gap: 6px; align-items: center; padding-top: 0; padding-bottom: 0; }
+.tg.compact .ev { border-radius: 5px; padding: 2px 3px; }
+.tg.compact .ev b { font-size: 10px; line-height: 1.15; white-space: normal; overflow-wrap: anywhere; }
+
+.dl { position: absolute; left: 0; right: 0; height: 2px; border-radius: 1px; z-index: 3; }
+.dl-pill { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); max-width: calc(100% - 8px); height: 20px; border-radius: 999px; padding: 0 8px 0 6px; display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.dl-pill span { overflow: hidden; text-overflow: ellipsis; }
+.dl-pill::after { content: ''; position: absolute; inset: -8px 0; }
+.dl.done { opacity: .45; }
+.dl.done .dl-pill span { text-decoration: line-through; }
+.tg.compact .dl-pill { left: 0; max-width: 100%; height: 14px; padding: 0 3px 0 2px; gap: 1px; font-size: 9px; border-radius: 4px; }
+
+.now-line { position: absolute; left: 0; right: 0; height: 2px; background: var(--text); z-index: 4; pointer-events: none; transform: translateY(-1px); }
+.now-line::before { content: ''; position: absolute; left: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--text); }
+
+/* Week header and all-day rows (inside the card so the columns line up) */
+.week-head, .allday-row { display: flex; padding: 0 8px 0 34px; flex: none; }
+.week-head { padding-top: 8px; padding-bottom: 6px; }
+.week-head button { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--text2); }
+.week-head .n { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text); }
+.week-head .today .n { background: var(--text); color: var(--on-text); }
+.allday-row { position: relative; padding-bottom: 5px; border-bottom: 1px solid var(--hair); }
+.allday-row .lbl { position: absolute; left: 0; width: 34px; text-align: right; padding-right: 5px; font-size: 9px; color: var(--text2); top: 2px; }
+.allday-row .cell { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 0 1px; }
+.ad-pill { display: block; width: 100%; border-radius: 4px; padding: 1px 3px; font-size: 9px; font-weight: 700; overflow: hidden; white-space: nowrap; text-overflow: clip; }
+.allday-row.wide { padding: 10px 12px 10px 46px; flex-wrap: wrap; gap: 6px; }
+.allday-row.wide .lbl { width: 46px; font-size: 11px; top: 16px; padding-right: 8px; }
+.allday-row.wide .ad-pill { width: auto; max-width: 100%; border-radius: 999px; padding: 5px 12px; font-size: 13px; text-overflow: ellipsis; }
+
+/* ---------- Add / edit item sheet ---------- */
+.title-field { width: 100%; background: var(--field); border: 0; outline: 0; border-radius: 16px; padding: 14px; font-size: 18px; font-weight: 600; margin: 14px 0 16px; }
+.pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.pill { display: inline-flex; align-items: center; background: var(--pill); border-radius: 999px; padding: 0 4px 0 12px; min-height: 36px; transition: background .2s; }
+.pill-text { background: none; border: 0; outline: 0; padding: 0; min-width: 0; text-align: center; }
+.pill-pick { position: relative; width: 30px; height: 36px; display: flex; align-items: center; justify-content: center; color: var(--text2); overflow: hidden; }
+.pill-native { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; margin: 0; cursor: pointer; }
+.pill.bad { background: var(--red-bg); }
+.rep-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.rep-pills button { min-height: 36px; padding: 0 14px; border-radius: 999px; background: var(--field); font-size: 14px; font-weight: 600; }
+.rep-pills button.on { background: var(--text); color: var(--on-text); }
+.weekdays { display: flex; gap: 6px; flex: 1; justify-content: space-between; }
+.weekdays button { width: 36px; height: 36px; border-radius: 50%; background: var(--pill); font-size: 13px; font-weight: 700; text-align: center; }
+.weekdays button.on { background: var(--text); color: var(--on-text); }
+.row .seg { background: var(--pill); }
+.notes-box { width: 100%; min-height: 96px; background: var(--field); border: 0; outline: 0; border-radius: 16px; padding: 12px 14px; resize: none; display: block; }
+.delete-btn { width: 100%; min-height: 50px; border-radius: 16px; background: var(--field); color: var(--red); font-weight: 600; text-align: center; margin-top: 24px; }
+.tg.compact .ev.short { display: block; }
+.tg.compact .ev.short b { white-space: nowrap; text-overflow: clip; }

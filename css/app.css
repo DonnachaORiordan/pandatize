@@ -1,0 +1,172 @@
+/* app.css – the shared building blocks: tabs, tab bar, cards, buttons,
+   sheets, grouped rows, Settings and the Categories screen. */
+
+/* ---------- Tabs ---------- */
+#tabs-viewport { position: absolute; inset: 0; overflow: hidden; }
+#tabs-viewport, #tabs-viewport * { touch-action: pan-y; }  /* we handle sideways swipes ourselves */
+#tabs-track { display: flex; height: 100%; will-change: transform; }
+.tab-page { flex: 0 0 100%; width: 100%; height: 100%; min-width: 0; display: flex; flex-direction: column; padding-top: var(--safe-top); }
+.page-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 8px 16px var(--tabbar-space); }
+
+#tabbar {
+  position: absolute; left: 16px; right: 16px; bottom: max(24px, var(--safe-bottom));
+  height: 64px; border-radius: 999px; z-index: 10;
+  display: flex; align-items: center; padding: 6px;
+  background: var(--float); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border: 1px solid var(--hair); box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+}
+#tabbar .tab {
+  flex: 1; height: 100%; border-radius: 999px; color: var(--text2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-size: 11px; font-weight: 600; transition: background .2s, color .2s;
+}
+#tabbar .tab.on { background: var(--card2); color: var(--text); }
+
+/* ---------- Text and common pieces ---------- */
+.big-title { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; margin-bottom: 20px; }
+.lead { color: var(--text2); font-size: 14px; margin: 6px 0 20px; }
+.section-label { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .04em; margin: 22px 4px 8px; }
+.footnote { font-size: 12px; color: var(--text2); margin: 8px 6px 0; line-height: 1.4; }
+
+.card { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); }
+
+.round-btn {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--card); box-shadow: var(--shadow);
+  display: flex; align-items: center; justify-content: center; flex: none; position: relative;
+}
+.round-btn.filled { background: var(--text); color: var(--on-text); }
+.round-btn.big { width: 40px; height: 40px; }
+.round-btn.small { width: 32px; height: 32px; }
+.round-btn::after { content: ''; position: absolute; inset: -5px; }   /* a slightly bigger tap area */
+
+.link { color: var(--accent); font-size: 16px; }
+.back-link { color: var(--accent); display: inline-flex; align-items: center; gap: 2px; font-size: 16px; min-height: 44px; margin-left: -6px; }
+
+.sq { width: 28px; height: 28px; border-radius: 8px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
+.sq.sm { width: 20px; height: 20px; border-radius: 6px; }
+.chip { font-size: 12px; font-weight: 600; color: var(--text2); background: var(--card2); border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
+.def-label { font-size: 11px; color: var(--text2); background: var(--card2); border-radius: 6px; padding: 2px 6px; white-space: nowrap; }
+
+.dashed-btn {
+  width: 100%; min-height: 52px; border: 1.5px dashed var(--check); border-radius: 22px; color: var(--text2);
+  display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; margin-top: 12px;
+}
+
+/* "Coming soon" screens */
+.soon { padding: 36px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.soon img { width: 84px; height: 84px; border-radius: 20px; margin-bottom: 8px; }
+.soon-h { font-size: 20px; font-weight: 700; }
+.soon p { color: var(--text2); font-size: 14px; max-width: 260px; }
+
+/* ---------- Segmented switch (e.g. Month / Week / Day / Agenda) ---------- */
+.seg { display: flex; background: var(--card2); border-radius: 11px; padding: 2px; }
+.seg button { flex: 1; min-height: 32px; border-radius: 9px; font-size: 14px; font-weight: 600; color: var(--text2); text-align: center; padding: 0 6px; white-space: nowrap; }
+.seg button.on { background: var(--seg); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+
+/* ---------- On/off toggle ---------- */
+.toggle { width: 51px; height: 31px; border-radius: 999px; background: var(--card2); position: relative; flex: none; transition: background .2s; }
+.sheet .toggle { background: var(--pill); }
+.toggle i { position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.25); transition: transform .2s; }
+.toggle.on { background: var(--toggle); }
+.toggle.on i { transform: translateX(20px); }
+
+/* ---------- Grouped rows (iOS style) ---------- */
+.group { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+.sheet .group { background: var(--field); box-shadow: none; }
+.group + .group, .group + .footnote + .group { margin-top: 16px; }
+.row { display: flex; align-items: center; gap: 10px; min-height: 50px; padding: 6px 14px; width: 100%; }
+.row + .row, .row-sep { border-top: 1px solid var(--hair); }
+.row-label { flex: none; }
+.row-grow { flex: 1; min-width: 0; }
+.row-end { margin-left: auto; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.row-value { display: flex; align-items: center; gap: 8px; color: var(--text2); min-height: 38px; }
+.row-icon { color: var(--text2); flex: none; }
+.row input[type=text], .row .text-in { flex: 1; min-width: 0; background: none; border: 0; outline: 0; padding: 8px 0; }
+.row.danger, .danger { color: var(--red); }
+.row.center { justify-content: center; font-weight: 600; }
+.x-btn { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text2); flex: none; }
+
+.pz-select {
+  -webkit-appearance: none; appearance: none; background: none; border: 0; outline: 0;
+  color: var(--accent); text-align: right; text-align-last: right; padding: 8px 0; max-width: 100%; cursor: pointer;
+}
+.pz-select option { color: initial; }
+
+.stepper { display: inline-flex; align-items: center; background: var(--pill); border-radius: 10px; }
+.stepper button { width: 38px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.stepper span { min-width: 26px; text-align: center; font-weight: 600; }
+
+/* ---------- Sheets (slide up from the bottom) ---------- */
+.sheet-wrap { position: absolute; inset: 0; z-index: 50; }
+.backdrop { position: absolute; inset: 0; background: var(--dim); opacity: 0; transition: opacity .25s ease; }
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; height: calc(100% - var(--safe-top) - 10px);
+  background: var(--sheet); border-radius: 28px 28px 0 0;
+  transform: translateY(100%); transition: transform .32s cubic-bezier(.2,.8,.2,1);
+  display: flex; flex-direction: column;
+}
+.sheet-wrap.open .backdrop { opacity: 1; }
+.sheet-wrap.open .sheet, .sheet-wrap.open .as-box { transform: none; }
+.grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--check); margin: 8px auto 2px; flex: none; opacity: .7; }
+.sheet-head { display: flex; align-items: center; padding: 4px 16px 10px; flex: none; }
+.sheet-head button { min-height: 44px; min-width: 60px; }
+.sheet-head button:last-child { text-align: right; font-weight: 700; }
+.sheet-title { flex: 1; text-align: center; font-weight: 700; font-size: 17px; }
+.sheet-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 16px calc(40px + var(--safe-bottom)); }
+
+/* Action sheets and pick-lists */
+.as-box { position: absolute; left: 8px; right: 8px; bottom: max(10px, var(--safe-bottom)); max-height: calc(100% - var(--safe-top) - 20px); display: flex; flex-direction: column; gap: 8px; transform: translateY(110%); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+.as-group { background: var(--sheet); border-radius: 16px; overflow-y: auto; min-height: 0; }
+.as-head { padding: 14px 16px; text-align: center; }
+.as-title { font-size: 14px; font-weight: 700; color: var(--text2); }
+.as-msg { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.as-btn { width: 100%; min-height: 54px; padding: 8px 16px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17px; color: var(--accent); border-top: 1px solid var(--hair); }
+.as-group > .as-btn:first-child { border-top: 0; }
+.as-btn.danger { color: var(--red); }
+.as-left .as-btn { justify-content: flex-start; color: var(--text); }
+.as-left .as-btn svg { margin-left: auto; color: var(--accent); }
+.as-cancel { background: var(--sheet); border-radius: 16px; font-weight: 700; border: 0; flex: none; }
+
+/* ---------- Toasts (little messages) ---------- */
+#toasts { position: absolute; left: 0; right: 0; bottom: calc(var(--tabbar-space) + 4px); z-index: 60; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+.toast { pointer-events: auto; background: var(--text); color: var(--on-text); border-radius: 999px; padding: 10px 16px; font-size: 14px; font-weight: 600; display: flex; gap: 14px; align-items: center; box-shadow: 0 8px 24px rgba(0,0,0,.3); opacity: 0; transform: translateY(10px); transition: opacity .2s, transform .2s; max-width: 92%; }
+.toast.show { opacity: 1; transform: none; }
+.toast button { color: inherit; text-decoration: underline; font-weight: 800; }
+
+/* ---------- Swipe-left-to-delete rows ---------- */
+.swipe-row { position: relative; overflow: hidden; }
+.swipe-del { position: absolute; top: 0; bottom: 0; right: 0; min-width: 84px; background: #FF453A; color: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: 600; visibility: hidden; overflow: hidden; white-space: nowrap; }
+.swipe-content { position: relative; }
+
+/* ---------- Full screens that slide in from the right (Settings…) ---------- */
+#screens .screen { position: absolute; inset: 0; z-index: 30; background: var(--bg); transform: translateX(100%); transition: transform .3s cubic-bezier(.3,.7,.3,1); display: flex; flex-direction: column; padding-top: var(--safe-top); }
+#screens .screen.open { transform: none; }
+.screen-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 16px calc(48px + var(--safe-bottom)); }
+.screen-top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+.version { text-align: center; color: var(--text2); font-size: 12px; margin-top: 24px; }
+
+/* ---------- Settings › Categories ---------- */
+.cat-card { margin-bottom: 12px; padding: 14px; border: 2px solid transparent; }
+.cat-card.open { border-color: var(--c); }
+.cat-head { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; }
+.cat-name { font-size: 17px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat-head > svg { color: var(--text2); }
+.cat-lines { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.cat-line { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--text2); }
+.cat-line svg { margin-top: 1px; }
+.cat-edit { margin-top: 14px; }
+.cat-edit .group { background: var(--card2); box-shadow: none; }
+.cat-edit .stepper, .cat-edit .toggle { background: var(--seg); }
+.cat-edit .toggle.on { background: var(--toggle); }
+.cat-edit .def-label { background: var(--seg); }
+.cat-edit .section-label { margin-top: 16px; }
+.dots { display: flex; justify-content: space-between; padding: 4px 2px; }
+.dot { width: 22px; height: 22px; border-radius: 50%; position: relative; }
+.dot.on { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--text); }
+.dot::after { content: ''; position: absolute; inset: -6px -2px; }
+.tpl-preview { font-size: 13px; color: var(--text2); padding: 0 14px 10px; }
+.tpl-pill { background: color-mix(in srgb, var(--c, var(--accent)) 28%, transparent); color: var(--text); border-radius: 6px; padding: 1px 5px; font-weight: 600; }
+.btn-row { display: flex; gap: 8px; margin-top: 16px; }
+.btn-row button { flex: 1; min-height: 44px; border-radius: 14px; background: var(--card2); font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-row button:disabled { opacity: .35; }

@@ -1,0 +1,105 @@
+/* theme.css – the colours, backgrounds and basic text rules (DESIGN.md sections 1–3).
+   Everything else uses these named colours ("variables"), so dark and light mode
+   only have to be described once, here. */
+
+:root {
+  color-scheme: dark;
+  --bg: radial-gradient(140% 55% at 0% 0%, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 60%),
+        linear-gradient(180deg, #000000 0%, #0C0C0F 40%, #222226 100%);
+  --page: #000000;            /* colour around the app on a wide laptop window */
+  --card: #1C1C1E;
+  --card2: #2C2C2E;
+  --seg: #4A4A4E;             /* selected segment */
+  --text: #F5F5F7;
+  --on-text: #000000;         /* text sitting on a text-coloured fill */
+  --text2: #A1A1AA;
+  --check: #5A5A62;
+  --hair: rgba(255,255,255,0.08);
+  --accent: #4DA3FF;
+  --red: #FF6961;
+  --red-bg: #3A1D1C;
+  --orange: #FFB340;
+  --orange-bg: #3A2C14;
+  --toggle: #30D158;
+  --shadow: none;
+  --sheet: #1C1C1E;
+  --field: #2C2C2E;
+  --pill: #48484C;            /* date/time pills inside fields */
+  --dim: rgba(0,0,0,0.55);    /* the dimming behind a sheet */
+  --float: rgba(28,28,30,0.86);
+
+  --safe-top: max(env(safe-area-inset-top, 0px), 14px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tabbar-space: 108px;      /* room left at the bottom so content clears the tab bar */
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Inter, 'Helvetica Neue', system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg: linear-gradient(180deg, #E2EBFA 0%, #F1F5FC 45%, #FFFFFF 100%);
+    --page: #D9E2F2;
+    --card: #FFFFFF;
+    --card2: #E8E8EE;
+    --seg: #FFFFFF;
+    --text: #111114;
+    --on-text: #FFFFFF;
+    --text2: #5C5C66;
+    --check: #8E8E96;
+    --hair: rgba(0,0,0,0.07);
+    --accent: #0062D1;
+    --red: #C4000F;
+    --red-bg: #FDE3E1;
+    --orange: #A04F00;
+    --orange-bg: #FFEFD9;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --sheet: #F2F2F7;
+    --field: #FFFFFF;
+    --pill: #E8E8EE;
+    --dim: rgba(0,0,0,0.35);
+    --float: rgba(255,255,255,0.88);
+  }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; margin: 0; }
+
+body {
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--text);
+  background: var(--page);
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-user-select: none; user-select: none;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-align: inherit; }
+input, textarea, select { font: inherit; color: inherit; }
+input, textarea { -webkit-user-select: text; user-select: text; }
+h1, h2, p { margin: 0; }
+svg { display: block; flex: none; }
+
+/* Hide scroll bars so the laptop looks like the phone */
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
+
+/* The phone-shaped app area (centred on a wide laptop window) */
+#app {
+  position: relative;
+  height: 100%;
+  height: 100dvh;
+  max-width: 430px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* iPhone "Reduce Motion": no sliding or bouncing (full version comes in step 5) */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
