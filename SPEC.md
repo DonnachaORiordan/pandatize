@@ -1,110 +1,180 @@
-# Pandatize – SPEC (what to build, and in what order)
+# Pandatize – SPEC (the whole app, and the order to build it)
 
 Pandatize is my habit tracker + calendar + to-do lists/notes app for my iPhone (a progressive web app added to my home screen).
-- **How it looks:** DESIGN.md (follow it exactly).
-- **What it does and the build order:** this file.
+- **How it looks and moves:** DESIGN.md (follow it exactly).
+- **What it does and the build order:** this file. The whole app is planned here. There are 6 big build steps (section 12).
 
-## 1. The big plan (versions)
-The app is built in versions, so I can use it on my phone early. Each version is added to the SAME app (same repo, same address, same home-screen icon).
-
-| Version | What it adds |
-|---|---|
-| **1 (this file, sections 2–11)** | Habits + the Today screen (habits part), settings, backup, celebrations, graph. Works offline on my iPhone. |
-| 2 (planned later) | Calendar (month/week/day/agenda, events, deadlines, all-day items, categories, repeats, countdowns, auto-tasks, search, filter) + to-dos, Now/next and countdowns on Today. |
-| 3 (planned later) | Lists (notes and to-dos, subtasks, priorities, pinned items). |
-| 4 (planned later) | Real phone notifications (needs a server) + polish. |
-
-Reminders are **in-app only** until version 4: they show as badges, countdowns and auto-tasks inside the app, not as phone notifications.
-
-## 2. Technology decisions
+## 1. Technology decisions
 - Plain HTML, CSS and JavaScript. No frameworks, no build tools, no Node.js. Must work by double-clicking index.html on my laptop (except the offline/home-screen features, which only work on the live site).
 - The app name is written in ONE place: js/config.js.
-- All saving and loading code is in ONE file: js/storage.js. (So online syncing could be added one day without touching the rest.)
-- Data is saved on the device (localStorage) with a `dataVersion` number (version 1 = dataVersion 1). Plan the data shape so calendar items, to-dos and lists can be added in later versions without breaking it.
+- All saving and loading code is in ONE file: js/storage.js (so online syncing could be added one day).
+- Data is saved on the device with a `dataVersion` number (starts at 1). Design the data shape in step 1 for the WHOLE app (habits, categories, calendar items, to-dos, lists, settings), so later steps don't need a data conversion. If the format ever has to change, raise dataVersion and write a converter. Use localStorage unless the data could outgrow it; if so use IndexedDB, still only inside storage.js.
 - Progressive web app: manifest.json, home-screen icons made from logo.png, and a service worker so it works offline. The service worker has a version number that must go up every time any app file changes.
 - Hosting: GitHub Pages from a PUBLIC GitHub repo called `pandatize`. Never put personal data, backups, passwords or keys in the repo.
-- Any outside library, sound or image: tell me its name, source and licence first and wait for my OK. Relaxed licences only (MIT, BSD, CC0, CC-BY with credit). List everything in CREDITS.md. Prefer drawing things ourselves (SVG) and generating simple sounds in code.
-- Respect the iPhone "Reduce Motion" setting (see DESIGN.md section 10).
+- Any outside library, sound or image: tell me its name, source and licence first and wait for my OK. Relaxed licences only (MIT, BSD, CC0, CC-BY with credit). List everything in CREDITS.md. Prefer drawing things ourselves (SVG) and making simple sounds in code.
+- Weeks run Monday to Sunday everywhere. Times use the 24-hour clock. Dates look like "Tue 17 Nov".
+- Respect the iPhone "Reduce Motion" setting (DESIGN.md section 10).
 
-## 3. Screens in version 1
-- **Tab bar** with Today, Habits, Calendar, Lists. Swipe left/right to move between tabs (with a quick slide).
-  - Calendar and Lists show a simple, nicely styled "Coming in version 2" / "Coming in version 3" screen for now.
-- **Today:** date header, gear button (opens Settings), daily-habits progress bar, compact habit tiles (ticking works here too), "All habits" tile. Celebration when all daily habits are done.
-- **Habits:** title with graph and + buttons, progress bar, week strip, habit cards.
-- **Add / edit habit sheet.**
-- **Progress (habit graph).**
-- **Streak milestone screen.**
-- **Settings** (from the gear): Sounds on/off, Export backup, Import backup, Archived habits (with Unarchive and Delete), and the app version number. Styled with the same iOS-style grouped rows as the sheets.
+## 2. Navigation
+- Floating tab bar: Today, Habits, Calendar, Lists. Tap a tab or swipe left/right to move between tabs (quick slide). Swiping doesn't change tabs while a sheet or panel is open, or when the swipe starts on something that scrolls sideways or a row being swiped to delete.
+- Settings opens from the gear button on Today.
+- Until a tab is built, it shows a simple, nicely styled "Coming soon" screen.
 
-## 4. Habits – the rules
-- A habit has: title, colour (palette or custom), icon, frequency (**every day** OR **X times per week**, X from 1 to 7), date created, archived yes/no, and its tick history (a list of dates it was done).
-- Weeks run **Monday to Sunday**.
-- **Ticking:** tap the tick box to mark done; tap again to un-tick. I can tick for today, any past day, or a future day, by picking the day in the week strip on Habits (‹ › arrows or swiping the strip goes to other weeks). Today's tiles on the Today screen always tick for today.
+## 3. Habits
+- A habit has: title, colour (palette or custom), icon, frequency (**every day** OR **X times per week**, X from 1 to 7), date created, archived yes/no, and its tick history (the dates it was done).
+- **Ticking:** tap the tick box to mark done; tap again to un-tick. I can tick for today, any past day, or a future day, by picking the day in the week strip on Habits (‹ › arrows or swiping the strip goes to other weeks). Tiles on the Today screen always tick for today.
 - Days before a habit was created never count as missed.
-- **Daily streak:** the number of days in a row it was done, counting back from today if done today, otherwise from yesterday. (Not ticking today yet doesn't break the streak until the day is over.)
-- **Weekly habit:** shows "2 of 3 this week" (pips). Its streak is the number of weeks in a row the target was met, counting back from this week if already met, otherwise from last week. Shown as "N weeks in a row".
-- **Best streak:** the longest streak ever (days for daily habits, weeks for weekly ones). Never goes down.
+- **Daily streak:** days in a row it was done, counting back from today if done today, otherwise from yesterday (not ticking today yet doesn't break the streak until the day is over).
+- **Weekly habit:** shows "2 of 3 this week" with pips. Its streak is the number of weeks in a row the target was met, counting back from this week if already met, otherwise from last week ("N weeks in a row").
+- **Best streak:** the longest streak ever (days for daily, weeks for weekly). Never goes down.
 - **History strip:** the last 20 days (DESIGN.md section 6).
-- **Archive:** hides the habit from Today, Habits and the graph, but keeps its history. Can be unarchived in Settings.
-- **Delete:** asks first ("Delete Gym? Its history will be lost. This can't be undone."), then removes it for good with a gentle fade.
-- Habits can be put in any order: press and hold a card, then drag it.
+- **Archive:** hides the habit from Today, Habits and the graph but keeps its history. Unarchive in Settings.
+- **Delete:** asks first ("Delete Gym? Its history will be lost. This can't be undone."), then removes it with a gentle fade.
+- Reorder: press and hold a card, then drag.
 - **Empty state:** with no habits, Today and Habits show a friendly message, an "Add a habit" button and a "Start with example habits" button (the 5 examples in DESIGN.md section 4).
 
-## 5. Progress bar and celebrations
-- The progress bar counts **daily habits only** (weekly habits are left out). Segments in the colours of the done daily habits. A small sliver at 0%.
-- **Perfect day:** when all daily habits are done for TODAY (and there's at least one), show the celebration once that day (DESIGN.md section 8: progress bar fills → "Perfect day!" card → confetti + a different, brighter sound). If a habit is un-ticked, the card goes away; re-reaching 100% the same day shows the card again but without confetti.
-- Back-filling a past day to 100% gives a gentle chime only (no confetti).
-- **Streak milestones** at 7, 30 and 100 (days for daily habits, weeks for weekly ones): show the milestone screen the first time each one is reached. Each habit/milestone pair is only celebrated once.
+### Progress bar and celebrations
+- The progress bar counts **daily habits only**. Segments in the colours of the done daily habits. A small sliver at 0%.
+- **Perfect day:** when all daily habits are done for TODAY (and there's at least one), play the celebration once that day (progress bar fills → "Perfect day!" card → confetti + a brighter sound). If a habit is un-ticked the card goes away; reaching 100% again the same day shows the card without confetti.
+- Back-filling a past day to 100% gives a gentle chime only.
+- **Streak milestones** at 7, 30 and 100 (days for daily habits, weeks for weekly ones): show the milestone screen the first time each is reached. Each habit/milestone pair is celebrated only once.
 
-## 6. Graph ("Progress" screen)
+### Graph ("Progress" screen)
 - ONE line graph of the **% of all habits completed**.
-- Each day's % = daily habits done that day ÷ daily habits that existed (created and not archived) that day. **On Sundays only, weekly habits are added in:** each weekly habit counts as 1 done if its weekly target was met, otherwise 1 not done.
+- Each day's % = daily habits done that day ÷ daily habits that existed (created, not archived) that day. **On Sundays only, weekly habits are added in:** each counts as 1 done if its weekly target was met, otherwise 1 not done.
 - **Week:** 7 points (Mon–Sun). **Month:** one point per day. **Year:** one point per week (the average of that week's days).
-- ‹ › arrows move to the previous/next week, month or year. Future days have no point.
-- The big number is the average for the period; the comparison line compares it with the previous period.
-- "Per habit" list: % of days done in the period for daily habits; "N of M wks" (weeks where the target was met) for weekly habits.
+- ‹ › arrows move to the previous/next period. Future days have no point.
+- The big number is the period's average; the comparison line compares it with the previous period.
+- "Per habit": % of days done in the period for daily habits; "N of M wks" for weekly habits.
 
-## 7. Sounds
-- Completion sound for ticking a habit (short, soft). A different, brighter sound for a perfect day. A gentle chime for milestones.
-- Generated in code (Web Audio) or from free sounds with a relaxed licence (ask me first and give me 2–3 options to try).
-- Sounds on/off in Settings (saved).
+## 4. Calendar items
+There are three types of item. All have: title, category (sets the colour), location (optional), notes (optional), repeat, reminders, countdown, auto-task.
+- **Event:** start date + time and end date + time (default length 1 hour). Shown as a coloured block.
+- **Deadline:** ONE date + time. Takes up no time: shown as a thin coloured line with a flag and title at its exact time. Can be ticked as done (then it's shown faded with a line through it, and its countdown and auto-task disappear).
+- **All-day:** a date (or a start and end date). Shown in a strip at the top of the day.
 
-## 8. Backup (export / import)
-- **Export:** saves all my data as a .json file named like `pandatize-backup-2026-11-16.json`, using the iPhone share menu (so I can Save to Files > iCloud Drive). On the laptop it just downloads.
-- **Import:** pick a backup file, then choose "Replace everything" or "Add missing habits". Check the file is a real Pandatize backup first, and show a clear message if it isn't.
-- The backup includes `dataVersion`, so future versions can convert old backups.
+### Categories
+- Starting categories and colours: Lecture (Indigo), Assignment due (Red, default type Deadline), Exam (Yellow), Work (Teal), Team meeting (Sky), Football (Lime), Social (Pink), Birthday (Orange, default type All-day, default repeat Yearly). I can add, edit, reorder and delete categories (deleting asks which category its items move to).
+- Each category has defaults that new items in it start with: colour, default type, default repeat, **default reminders** (a list, e.g. "1 day before", "15 min before"), **default countdown start** (N days before, or Never), and **default auto-task** (off, or: a text template, how many days before it appears, and how often it reminds).
+- Starting defaults:
 
-## 9. Home screen and offline
+| Category | Reminders | Countdown | Auto-task |
+|---|---|---|---|
+| Lecture | 15 min before | Never | None |
+| Assignment due | 1 day before, 3 hours before | 14 days before | "Start {title}", 10 days before, every 2 days |
+| Exam | 1 week before, 1 day before | 30 days before | "Study for {title}", 14 days before, daily |
+| Work | 1 hour before | Never | None |
+| Team meeting | 15 min before | Never | "Prepare notes for {title}", 1 day before, once |
+| Football | 2 hours before | Never | None |
+| Social | 1 hour before | Never | None |
+| Birthday | On the day 09:00, 1 week before 09:00 | 30 days before | "Get a present for {name}", 1 month before, weekly |
+
+- Template placeholders: **{title}** = the item's title. **{name}** = the title with the category word and any 's removed ("Sarah's birthday" → "Sarah").
+- Changing a category's defaults affects new items only, plus existing items that are still using the default (not ones I changed by hand).
+- On an item, each default is shown with a small "Exam default" label and can be changed, added to, or turned off for that one item.
+
+### Repeats
+- Options: None, Daily, Weekly (pick the weekdays; default the item's weekday), Every 2 weeks, Monthly (same date), Yearly, Custom (every N days / weeks / months, with weekdays for weeks). Optional end date.
+- Editing or deleting one occurrence of a repeating item asks: **This one only / This and future ones / All**.
+- Store a repeating item once with its rule and exceptions, not as hundreds of copies.
+
+### Countdowns
+- An item with a countdown appears in the Countdowns strip on Today from its start (N days before) until it has passed (or the deadline is ticked). Text: "Today", "Tomorrow", then "3 days", "12 days".
+- Colour: neutral, **orange at 3 days or fewer, red at 1 day or fewer**.
+- For repeating items the countdown is for the next occurrence.
+
+### Auto-tasks
+- An item with an auto-task creates a to-do automatically N days before (e.g. "Study for Statistics exam" 14 days before). It appears in the to-do list for that day and carries forward each day until I tick it or the item has passed. It's tagged with its linked event (sparkle + colour dot + event title); tapping the tag opens the event.
+- If I edit the event's title or date, the auto-task updates. Deleting the event deletes its un-ticked auto-task.
+- "Reminder frequency" (once, daily, every 2 days, weekly) = how often it comes up in the reminders bell (below) until ticked.
+
+### Reminders (in-app only)
+- iPhone web apps can't send real notifications without a server, so reminders live inside the app:
+  - A **bell button** on Today (beside the gear) with a red count badge. It opens a panel listing reminders that have come due and not been dismissed (item title, "in 2 hours" / "tomorrow 09:30", category colour). Tap one to open the item; swipe or "Clear all" to dismiss.
+  - If the app is open when a reminder comes due, a small banner slides down from the top for a few seconds.
+- Real phone notifications are on the Later list.
+
+## 5. Calendar views
+All views share the header (DESIGN.md section 7): ‹ title › arrows, search, filter and + buttons, and the Month / Week / Day / Agenda switch. The app remembers the last view used. Tapping the title jumps back to today.
+- **Month:** the "open grid" (DESIGN.md section 7). Coloured lines only, no titles; to-do count badge; arrows (not swiping) change month. Tapping a day slides up the **day panel**: that day's events, deadlines, all-day items and to-dos with titles and times, plus a + button to add to that day and an "Open day" link to the Day view.
+- **Week:** 7 columns with a time grid; events as blocks, deadlines as flagged lines, all-day items in a strip at the top, a "now" line. Arrows change week. Tap a day's header to open its Day view.
+- **Day:** that day's to-do list at the top, then the all-day strip, then the time grid (events as blocks with title, time and location; deadlines as lines with a flag and title; "now" line). A mini week strip picks other days. Tap an empty time slot to add an event there.
+- **Agenda:** a scrolling list of upcoming items grouped by date ("Today · Tue 17 Nov", "Wed 18 Nov"…), with countdown chips on deadlines. Loads more as I scroll. Days with nothing are skipped.
+- Time grids show the whole day, scrollable, starting scrolled to about 08:00 (or to now, for today). Events that overlap sit side by side.
+- Tapping any item opens the **add/edit item sheet** (DESIGN.md section 8). Swipe left on an item in a list to delete (fades out).
+- **Search** (magnifier): typing lists all matching events, deadlines and all-day items, past and future, in "Upcoming" and "Past" groups with an All / Upcoming / Past switch. Matches title, location and notes; ignores capitals; tolerates small typos. Repeating items show their next few and last few occurrences with an "N more" count.
+- **Filter** (filter icon): pick a category (chips) to see a list of all UPCOMING items in it, soonest first, each with date, time and countdown. "Clear" goes back.
+- **Flexible typing:** date and time fields open the normal iPhone pickers, but also accept typed text like "7:30pm", "19:30", "1930", "tomorrow", "fri", "next fri", "20 nov".
+
+## 6. To-dos (day to-dos)
+- Every day has a to-do list (shown on Today, in the Day view and in the day panel). Add with "Add a to-do" (just a title; it belongs to that day).
+- Tick to complete (line through, stays visible that day). Swipe left to delete. Tap to rename or move to another day.
+- **Carry over:** unfinished to-dos from past days move to today automatically, tagged "Carried over from Mon" (the day they were first set for).
+- Auto-tasks (section 4) and list to-dos with a due date (section 8) also appear here, with their tags.
+- The month view badge on a day = that day's unfinished to-dos (carried-over ones count on today).
+
+## 7. Today screen (top to bottom)
+1. Date header, bell and gear buttons.
+2. Daily-habits progress bar.
+3. **Now / next card:** the current event (with time left, time range, location and a thin progress line) and the next one ("NEXT · Operations Research · 12:00 · in 1 h 40 min"). If nothing is on now, it shows just the next event today; if nothing is left today, "Nothing else today".
+4. **Schedule:** today as a coloured timeline (events as blocks, deadlines as small flags at their time, "now" line), showing from the first item to the last (at least 08:00–18:00), with an "Open day" link. All-day items as chips above it. Hidden with a short "Nothing scheduled" line if the day is empty.
+5. **To do:** today's to-do list with "N left".
+6. **Habits:** the compact tiles.
+7. **Countdowns:** the sideways strip.
+- Updates itself every minute while open, and when the app comes back to the front (including rolling over to a new day).
+
+## 8. Lists
+- **Lists screen:** all my lists (as many as I want), each with a name, colour and icon, showing counts ("9 to-dos · 4 notes") and "3 due this week" in orange if any. + adds a list. "Search all lists" searches every list. A "Recently edited" section shows the last 3 items edited. Start with four lists: College, Shopping, Ideas, General notes. Press and hold to reorder; a list's ⋯ menu has Rename/Edit and Delete (asks first).
+- **Inside a list:** notes and to-dos mixed together.
+  - **To-do:** checkbox, title, optional due date and time, optional priority flag (low = yellow, medium = orange, high = red), optional subtasks (each with its own checkbox; shows "1 of 3 subtasks"), optional notes.
+  - **Note:** a title and body text.
+  - **Pinned** items stay at the top under "Pinned". Then "Everything else". Then "Completed · N": completed to-dos stay visible with a line through them (un-tick to bring back).
+  - Search within the list. Press and hold to reorder. Swipe left to delete (fades out). Tap an item to open and edit it in a sheet (with Pin, Delete).
+  - Two buttons bottom right: "Note" and "+ To-do".
+- A list to-do with a due date also appears in that day's to-do list (Today / Day view), tagged with its list's name and colour; ticking it in either place ticks it in both. If it's overdue and not done, it carries over like other to-dos.
+
+## 9. Settings (from the gear)
+iOS-style grouped rows: **Categories** (section 4; laid out as in DESIGN.md), Sounds on/off, Archived habits (Unarchive, Delete), Export backup, Import backup, app version number.
+
+## 10. Sounds and backup
+- Sounds: a short soft completion sound for ticks (habits and to-dos), a brighter one for a perfect day, a gentle chime for milestones. Made in code (Web Audio) unless I ask for sound files. On/off saved in Settings.
+- **Export:** saves ALL data (habits, calendar, to-dos, lists, categories, settings) as `pandatize-backup-2026-11-16.json` through the iPhone share menu (so I can Save to Files > iCloud Drive). On the laptop it downloads.
+- **Import:** pick a backup, then "Replace everything" or "Add what's missing". Check it's a real Pandatize backup first and show a clear message if not. Old dataVersions are converted.
+- Settings shows a gentle nudge if I haven't exported for 30 days.
+
+## 11. Home screen and offline
 - manifest.json: name Pandatize, dark background, standalone (full screen), portrait.
-- Icons made from logo.png (180 × 180 apple-touch-icon, 192 × 192 and 512 × 512). Make them with tools already on Windows (e.g. PowerShell). Don't install anything without asking me.
-- Service worker: saves all app files so the app opens with no internet.
+- Icons made from logo.png (180 × 180 apple-touch-icon, 192 × 192, 512 × 512), using tools already on Windows. Don't install anything without asking me.
+- Service worker: saves all app files so the app opens with no internet. Raise its version number with every change after it exists.
 
-## 10. Build steps for version 1
-Each step ends with something I can see working. Claude Code does ONE step at a time, and ticks it here only after I say it works.
+## 12. Build steps
+Six big steps. Claude Code does ONE step at a time, may split it into a few parts of its own choosing, and tells me how to check each. Tick a step here only after I say it works. After each step I commit, and from step 2 onwards I push so it's on my phone.
 
-- [ ] **Step 1 – Skeleton and look:** folder structure, index.html, the theme (dark/light colours and backgrounds from DESIGN.md), js/config.js with the name, the floating tab bar with 4 tabs and placeholder screens, sliding between tabs (tap and swipe). Opens by double-clicking index.html.
-- [ ] **Step 2 – Habits you can add and edit:** js/storage.js (dataVersion 1), the Habits screen with habit cards (no ticking yet), the add/edit habit sheet (title, colour palette + custom, icon, frequency), archive, delete with confirmation, drag to reorder, empty state + example habits.
-- [ ] **Step 3 – Ticking, streaks and history:** ticking (today, past and future days), the week strip with other weeks, the history strip, daily and weekly streaks, best streaks, the progress bar on Habits.
-- [ ] **Step 4 – Today screen:** date header, gear button, progress bar, compact habit tiles with ticking, "All habits" tile, empty state.
-- [ ] **Step 5 – Settings and backup:** the Settings screen, sounds on/off (saved, sounds come in step 7), export and import, archived habits.
-- [ ] **Step 6 – Go live:** manifest, icons from logo.png, service worker, then (with my help) create the GitHub repo, turn on GitHub Pages and add it to my iPhone home screen. Test offline.
-- [ ] **Step 7 – Animations and sounds:** tick animations (squash and stretch, card pop, square flying in an arc, streak counter roll-up, flame flicker, progress bar slide), sounds, perfect-day celebration with confetti, streak milestone screen, Reduce Motion support. Follow DESIGN.md sections 9–10.
-- [ ] **Step 8 – Progress graph:** the Progress screen (Week/Month/Year, arrows, average, comparison, per-habit list).
-- [ ] **Step 9 – Final checks:** go through section 11 on my laptop and iPhone, fix anything, update CLAUDE.md to say version 1 is complete.
+- [ ] **Step 1 – Foundation and Habits.** Folder structure, theme (dark/light, backgrounds), js/config.js, js/storage.js with the data shape for the whole app, tab bar with sliding/swiping and "Coming soon" screens. Everything in section 3 except the animations, sounds, celebrations and graph: Habits screen, add/edit habit sheet, ticking for any day, week strip, streaks, history strips, progress bar, reorder, archive, delete, empty state and examples. Today screen with header, progress bar and habit tiles. Settings with archived habits, sounds switch, export and import.
+- [ ] **Step 2 – Go live, then make it feel great.** Manifest, icons, service worker; then help me create the GitHub repo, turn on GitHub Pages, and add the app to my iPhone home screen (test offline). Then all habit animations and sounds (DESIGN.md sections 9–10), the perfect-day celebration with confetti, streak milestone screens, Reduce Motion support, and the Progress graph screen.
+- [ ] **Step 3 – Calendar core.** Categories with all their defaults and the Settings › Categories screen. The add/edit item sheet for Event / Deadline / All-day with category, times, location, notes and flexible typing (repeat, reminders, countdown and auto-task sections appear and save their values, but don't do anything until step 4). Month view with the day panel, Week view, Day view, Agenda view, the shared header, ticking deadlines, swipe to delete.
+- [ ] **Step 4 – Calendar smart features and the full Today screen.** Repeats with "This one only / This and future ones / All". Day to-dos with carry-over and month badges. Countdowns. Auto-tasks. In-app reminders (bell + banner). Search and category filter. Today screen completed: Now/next card, Schedule timeline, To do, Countdowns, minute-by-minute updating.
+- [ ] **Step 5 – Lists.** Everything in section 8, including due-dated list to-dos appearing in day to-do lists, and backups covering lists.
+- [ ] **Step 6 – Polish and final checks.** Remaining animations (strike-through drawing, fades on delete, month lines growing in, panels springing, tab slides), bigger hit areas everywhere, the backup nudge, speed check with a year of sample data, then go through section 13 with me on my laptop and iPhone and fix what we find. Update CLAUDE.md to say the app is complete.
 
-## 11. Version 1 checks (tick when tested on my iPhone)
-- [ ] Looks like DESIGN.md in dark mode AND light mode.
-- [ ] Can add, edit, archive, unarchive, reorder and delete habits.
-- [ ] Ticking works on Today and Habits, including past and future days.
-- [ ] Streaks, best streaks and "2 of 3 this week" are correct.
-- [ ] The progress bar only counts daily habits and never looks empty.
-- [ ] Perfect day celebration and milestones appear at the right moments, with sounds (and sounds can be turned off).
-- [ ] The graph matches what I ticked (spot-check a few days).
-- [ ] Export and import work (Save to Files > iCloud Drive, then import it back).
-- [ ] Works from the home-screen icon with Airplane Mode on.
-- [ ] Data survives closing and reopening the app.
+## 13. Final checks (tick when tested on my iPhone)
+- [ ] Every screen matches DESIGN.md in dark AND light mode.
+- [ ] Habits: add, edit, archive, unarchive, reorder, delete; ticking on Today and Habits for past and future days; streaks, best streaks and "2 of 3 this week" are right; progress bar counts daily habits only.
+- [ ] Perfect day and milestones appear at the right moments, with sounds (and sounds can be turned off).
+- [ ] The graph matches what I ticked.
+- [ ] Calendar: add, edit and delete events, deadlines and all-day items; all four views look right; the day panel opens.
+- [ ] Repeats work, including "This one only / This and future ones / All".
+- [ ] Category defaults apply to new items and can be changed per item.
+- [ ] Countdowns appear on time and turn orange then red.
+- [ ] Auto-tasks appear on the right day, carry over, and link to their event.
+- [ ] Reminders show in the bell.
+- [ ] To-dos carry over and month badges are right.
+- [ ] Search finds past and future items; the filter lists upcoming items.
+- [ ] Lists: notes, to-dos, subtasks, priorities, pins, search, completed items; due-dated to-dos show on their day.
+- [ ] Export and import bring everything back.
+- [ ] Works from the home-screen icon in Airplane Mode; data survives closing the app.
 
-## 12. Later list (ideas for later versions; don't build yet)
-- Version 2: calendar and to-dos (see DESIGN.md).
-- Version 3: lists.
-- Version 4: real notifications.
+## 14. Later list (not planned; don't build)
+- Real phone notifications (needs a server).
+- Accounts and syncing between devices.
+- Dragging events to move them; importing from Google Calendar.

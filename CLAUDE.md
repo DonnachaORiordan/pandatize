@@ -13,14 +13,15 @@
 
 ## The project
 - Pandatize: my habit tracker + calendar + lists app, built as an iPhone progressive web app.
-- **SPEC.md** = what to build and the build steps (we are on VERSION 1, build steps in section 10).
+- **SPEC.md** = the whole app, planned in full, and the 6 build steps (section 12). Check the ticks there to see which step we're on.
 - **DESIGN.md** = exactly how everything looks and moves. Follow it exactly; don't redesign anything.
 - **logo.png** = my app logo. Use it as it is; never redraw it.
 
 ## How we work
-- Do ONE build step (or part of a step) at a time, and nothing beyond what I ask.
-- Before writing anything, briefly tell me in plain language what you'll add or change and why.
-- When a step is finished, tell me exactly how to check it (what to open, what to tap, what I should see).
+- Do ONE build step at a time, and nothing beyond it. The steps are big on purpose: I want to move fast. Split a step into a few sensible parts yourself, finish each part fully, and keep going through the step without waiting for me unless you need a decision or a download approved.
+- Don't ask me to plan or design anything: SPEC.md and DESIGN.md already decide it. If something really is missing, choose what fits them best, tell me what you chose, and write it into the spec.
+- Before starting a step, briefly tell me in plain language what you'll build and in what parts.
+- When a step is finished, give me a short checklist to test it (what to open, what to tap, what I should see).
 - Only tick a build step in SPEC.md after I confirm it works.
 - Small looks-only tweaks I ask for between steps: do them, and record them in DESIGN.md or SPEC.md so later steps don't undo them.
 - If I change my mind about how something works, update SPEC.md/DESIGN.md first, then the code.
