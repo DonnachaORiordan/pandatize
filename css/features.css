@@ -1,0 +1,74 @@
+/* features.css – build step 2: to-do rows, countdown chips, the reminders bell,
+   panel and banner, and the Search and Category filter screens. */
+
+/* ---------- Countdown chips ---------- */
+.cd-chip { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 9px; background: var(--card2); color: var(--text2); white-space: nowrap; flex: none; }
+.cd-chip.orange { background: var(--orange-bg); color: var(--orange); }
+.cd-chip.red { background: var(--red-bg); color: var(--red); }
+
+/* ---------- To-do rows ---------- */
+.todo-row { display: flex; align-items: flex-start; gap: 12px; padding: 11px 8px; min-height: 48px; cursor: pointer; }
+.todo-row .main { flex: 1; min-width: 0; padding-top: 2px; }
+.todo-row .ttl { overflow-wrap: anywhere; }
+.todo-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--check); flex: none; display: flex; align-items: center; justify-content: center; color: transparent; position: relative; }
+.todo-check::after { content: ''; position: absolute; inset: -11px; }
+.todo-row.done .todo-check { background: var(--text); border-color: var(--text); color: var(--on-text); }
+.todo-row.done .ttl { text-decoration: line-through; color: var(--text2); }
+.todo-chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; margin-top: 5px; font-size: 12px; color: var(--text2); background: var(--card2); border-radius: 999px; padding: 2px 9px; }
+.todo-chip i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.todo-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.todo-add { display: flex; align-items: center; gap: 12px; padding: 4px 8px; min-height: 48px; color: var(--text2); }
+.todo-add .plus { width: 24px; display: flex; justify-content: center; flex: none; }
+.todo-add input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; padding: 8px 0; }
+.swipe-row + .todo-add { border-top: 1px solid var(--hair); }
+
+/* To-dos at the top of the Day view */
+.day-todos { flex: none; margin: 0 16px 12px; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; margin: 0 4px 8px; }
+.sec-head h2 { font-size: 20px; font-weight: 700; }
+.sec-head span { font-size: 14px; color: var(--text2); }
+.day-todos .card { padding: 2px 6px; max-height: 25vh; overflow-y: auto; }
+
+/* Month: the small count of unfinished to-dos */
+.month-day .badge { position: absolute; top: 3px; right: 2px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 999px; background: var(--card2); color: var(--text2); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+/* ---------- Reminders ---------- */
+.badge-red { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #FF453A; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.sheet.auto { height: auto; min-height: 34%; max-height: 72%; }
+.banner {
+  position: absolute; left: 12px; right: 12px; top: calc(var(--safe-top) + 4px); z-index: 70;
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 18px;
+  background: var(--float); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border: 1px solid var(--hair); box-shadow: 0 10px 30px rgba(0,0,0,.3); color: var(--text2);
+  transform: translateY(-180%); transition: transform .38s cubic-bezier(.2,.8,.2,1);
+}
+.banner.show { transform: none; }
+.banner .bar { width: 4px; align-self: stretch; border-radius: 2px; flex: none; }
+.banner .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.banner .ttl { font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.banner .sub { font-size: 13px; }
+
+/* ---------- Search ---------- */
+.search-top { display: flex; align-items: center; gap: 12px; min-height: 44px; margin-bottom: 12px; }
+.search-field { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; background: var(--card2); border-radius: 12px; padding: 0 4px 0 10px; min-height: 40px; color: var(--text2); }
+.search-field input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--text); padding: 8px 0; }
+.res-head { display: flex; align-items: center; justify-content: space-between; margin-top: 18px !important; }
+.res-head .link { font-size: 14px; font-weight: 600; text-transform: none; letter-spacing: 0; }
+.res-row { display: flex; align-items: center; gap: 10px; padding: 8px 6px; cursor: pointer; }
+.res-row + .res-row { border-top: 1px solid var(--hair); }
+.res-row.past { opacity: .6; }
+.res-row .bar, .filter-card .bar { width: 4px; align-self: stretch; border-radius: 2px; flex: none; }
+.res-row .main, .filter-card .main { flex: 1; min-width: 0; }
+.res-row .ttl, .filter-card .ttl { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.res-row .sub, .filter-card .sub { font-size: 13px; color: var(--text2); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.res-row mark { background: color-mix(in srgb, var(--c) 38%, transparent); color: inherit; border-radius: 4px; padding: 0 1px; }
+.date-block { width: 46px; height: 54px; border-radius: 12px; background: var(--card2); flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text2); line-height: 1.15; }
+.date-block b { font-size: 18px; font-weight: 800; color: var(--text); }
+
+/* ---------- Category filter ---------- */
+.chips-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }   /* all chips visible, wrapping onto more rows */
+.cat-chip { display: flex; align-items: center; gap: 7px; flex: none; white-space: nowrap; background: var(--card); box-shadow: var(--shadow); border-radius: 999px; padding: 8px 14px 8px 9px; font-size: 14px; font-weight: 600; }
+.cat-chip.on { background: var(--text); color: var(--on-text); }
+.filter-card { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; }
+.filter-card .sub { display: flex; align-items: center; gap: 5px; }
+.filter-card .sub span { overflow: hidden; text-overflow: ellipsis; }

@@ -70,8 +70,12 @@
       //   created, updated }
       items: [],
 
-      // Day to-dos (step 2). Each: { id, title, date, origDate, done, doneDate,
-      //   source: null or { type: 'auto', itemId, occ }, created }
+      // (An occurrence changed with "This one only" becomes its own item with seriesId = the series it came from,
+      //  and the series gets exceptions[date] = { deleted: true }.)
+
+      // Day to-dos. Each: { id, title, date (the day it shows on), origDate (the day it was first set for),
+      //   done, doneDate, created,
+      //   source: null, or for an auto-task { type: 'auto', itemId, occ (which occurrence), eventTitle, appear (date), frequency } }
       todos: [],
 
       // Lists (step 3). Each list: { id, name, color, icon, entries: [ … ] }. Each entry:

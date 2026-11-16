@@ -40,7 +40,10 @@
     opts = opts || {};
     const existing = opts.id ? I.get(opts.id) : null;
     if (opts.id && !existing) return;
-    const d = existing ? I.toDraft(existing) : I.newDraft(opts.date, opts.time);
+    // For a repeating item, "key" says which occurrence was tapped (the date it starts on).
+    const key = existing ? opts.key || I.startDate(existing) : null;
+    const d = existing ? I.toDraft(existing, key) : I.newDraft(opts.date, opts.time);
+    const orig = clone(d);              // how it looked before editing, to tell what changed
     let typeTouched = !!existing, repeatTouched = !!existing;
     const cat = () => C.get(d.categoryId);
     const P = {};                       // the date/time pills currently on screen
@@ -223,18 +226,38 @@
 
     const body = h('div', null, [typeSeg, titleInput, main, label('Repeat'), repeatBox, label('Reminders'), remBox, label('Countdown'), countBox, label('Auto-task'), taskBox, label('Notes'), notes]);
     if (existing) body.appendChild(h('button', { type: 'button', class: 'delete-btn', text: 'Delete', onclick: () => {
-      ui.actions({ title: 'Delete “' + existing.title + '”?', buttons: [{ label: 'Delete', value: 'yes', danger: true }] }).then(v => {
-        if (!v) return;
-        sheet.close();
-        Pz.calendar.deleteItem(existing.id);
-      });
+      Pz.calendar.deleteItem(existing.id, key, true).then(deleted => { if (deleted) sheet.close(); });
     } }));
+
+    // Which parts were changed, in plain words ("time and location")
+    function changes() {
+      const names = [['title', 'title'], ['type', 'type'], ['categoryId', 'category'], ['sDate', 'date'], ['eDate', 'date'], ['sTime', 'time'], ['eTime', 'time'],
+        ['location', 'location'], ['notes', 'notes'], ['repeat', 'repeat'], ['reminders', 'reminders'], ['countdown', 'countdown'], ['autoTask', 'auto-task']];
+      const out = [];
+      names.forEach(n => { if (JSON.stringify(d[n[0]]) !== JSON.stringify(orig[n[0]]) && !out.includes(n[1])) out.push(n[1]); });
+      return out;
+    }
 
     function save(close) {
       if (!d.title.trim()) { ui.toast('Give it a title first'); titleInput.focus(); return; }
       if (d.type === 'event' && d.eDate + 'T' + d.eTime <= d.sDate + 'T' + d.sTime) { ui.toast('The end needs to be after the start'); return; }
       if (d.type === 'allday' && d.eDate < d.sDate) { ui.toast('The end date is before the start date'); return; }
       if (d.repeat && d.repeat.until && d.repeat.until < d.sDate) { ui.toast('The repeat ends before the item starts'); return; }
+      if (existing && existing.repeat) {
+        // A repeating item: ask whether the change is for this one, this and future ones, or all.
+        const what = changes();
+        if (!what.length) {             // nothing changed except maybe the Done switch, which is always just this one
+          if (d.isDone !== orig.isDone) I.setDone(existing, key, d.isDone);
+          close(); Pz.app.changed(); return;
+        }
+        const words = what.length > 1 ? what.slice(0, -1).join(', ') + ' and ' + what[what.length - 1] : what[0];
+        askScope('You changed the ' + words + ' of “' + existing.title + '”.').then(scope => {
+          if (!scope) return;
+          I.saveOccurrence(d, key, scope);
+          close(); Pz.app.changed();
+        });
+        return;
+      }
       I.saveDraft(d);
       close();
       Pz.app.changed();
@@ -244,5 +267,11 @@
     const sheet = ui.sheet({ title: existing ? 'Edit item' : 'New item', onSave: save, body: body });
   }
 
-  Pz.itemSheet = { open: open };
+  // The "This one only / This and future ones / All" question for repeating items.
+  function askScope(message) {
+    return ui.actions({ title: 'This is a repeating event', message: message, buttons: [
+      { label: 'This one only', value: 'one' }, { label: 'This and future ones', value: 'future' }, { label: 'All events in the series', value: 'all' }] });
+  }
+
+  Pz.itemSheet = { open: open, pill: pill, askScope: askScope };
 })();

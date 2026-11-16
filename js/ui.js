@@ -4,6 +4,8 @@
 
 (function () {
   const ui = {};
+  // Start a slide/fade: make the browser notice where the element is now, then let it move.
+  ui.nextFrame = fn => { void document.body.offsetWidth; fn(); };
   let modals = 0;                      // how many sheets/action sheets are open right now
   ui.modalOpen = () => modals > 0;
 
@@ -32,7 +34,7 @@
 
   const mount = (rootId, el) => {
     document.getElementById(rootId).appendChild(el);
-    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('open')));
+    Pz.ui.nextFrame(() => el.classList.add('open'));
   };
 
   // ---- Small controls ----
@@ -91,7 +93,7 @@
     const hide = () => { t.classList.remove('show'); setTimeout(() => t.remove(), 250); };
     if (actionLabel) t.appendChild(h('button', { type: 'button', text: actionLabel, onclick: () => { hide(); onAction(); } }));
     root.appendChild(t);
-    requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+    Pz.ui.nextFrame(() => t.classList.add('show'));
     setTimeout(hide, actionLabel ? 5500 : 2800);
   };
 
@@ -147,6 +149,31 @@
     mount('sheets', wrap);
   });
 
+  // ---- Panel: a shorter slide-up box with a title and a list (e.g. Reminders). Tap outside to close. ----
+  ui.panel = (title, actionLabel, onAction, onClose) => {
+    const wrap = h('div', { class: 'sheet-wrap' });
+    let closed = false;
+    const close = () => {
+      if (closed) return; closed = true; modals--;
+      wrap.classList.remove('open');
+      setTimeout(() => wrap.remove(), 340);
+      if (onClose) onClose();
+    };
+    const body = h('div', { class: 'panel-list' });
+    wrap.appendChild(h('div', { class: 'backdrop', onclick: close }));
+    wrap.appendChild(h('div', { class: 'sheet auto' }, [
+      h('div', { class: 'grabber', onclick: close }),
+      h('div', { class: 'panel-head', style: { alignItems: 'center', paddingTop: '8px' } }, [
+        h('div', { class: 'panel-title', style: { flex: '1' }, text: title }),
+        actionLabel && h('button', { type: 'button', class: 'link', style: { minHeight: '36px' }, text: actionLabel, onclick: onAction })
+      ]),
+      body
+    ]));
+    modals++;
+    mount('sheets', wrap);
+    return { body: body, close: close };
+  };
+
   // ---- Sideways-drag detector ----
   // Watches a finger (or mouse) and, once it's clearly moving sideways, reports the drag.
   // o.accept(dx, startTarget) can refuse; o.move(dx); o.end(dx, speed).
@@ -191,10 +218,10 @@
 
   // ---- Swipe left to delete ----
   // Wraps a row. A short swipe shows a red Delete button; a long swipe deletes straight away.
-  ui.swipeRow = (content, onDelete) => {
+  ui.swipeRow = (content, onDelete, label) => {
     const W = 84;
     let open = false;
-    const del = h('button', { type: 'button', class: 'swipe-del' }, [Pz.icon('trash', 18), h('span', { text: 'Delete' })]);
+    const del = h('button', { type: 'button', class: 'swipe-del' }, [Pz.icon(label ? 'x' : 'trash', 18), h('span', { text: label || 'Delete' })]);
     content.classList.add('swipe-content');
     const wrap = h('div', { class: 'swipe-row', 'data-swiperow': '' }, [del, content]);
     const set = (x, anim) => {

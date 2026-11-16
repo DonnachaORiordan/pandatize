@@ -68,7 +68,7 @@
     s.pzOnPop = onPop;
     document.getElementById('screens').appendChild(s);
     screens.push(s);
-    requestAnimationFrame(() => requestAnimationFrame(() => s.classList.add('open')));
+    Pz.ui.nextFrame(() => s.classList.add('open'));
   }
   function pop() {
     const s = screens.pop();

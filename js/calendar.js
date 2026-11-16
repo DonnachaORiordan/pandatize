@@ -7,8 +7,9 @@
   const LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   let headEl, viewEl, view, cursor, today, panel = null, panelDate = null, agendaDays = 90, agendaMore = false;
 
-  const openItem = occ => Pz.itemSheet.open({ id: occ.item.id });
+  const openItem = occ => Pz.itemSheet.open({ id: occ.item.id, key: occ.key });
   const fill = color => ({ background: color, color: Pz.textOn(color) });
+  const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
 
   function init(page) {
     view = Pz.data.settings.calendarView || 'month';
@@ -35,14 +36,13 @@
   }
   // The + button adds to the day you're looking at.
   const addDate = () => view === 'day' ? cursor : panelDate || today;
-  const soon = what => () => ui.toast(what + ' arrives in build step 2');
 
   // ---------- Header ----------
   function renderHead() {
     headEl.innerHTML = '';
     const btns = h('div', { class: 'cal-btns' }, [
-      ui.roundBtn('search', 'Search', soon('Search')),
-      ui.roundBtn('filter', 'Filter by category', soon('The category filter')),
+      ui.roundBtn('search', 'Search', () => { closePanel(); Pz.search.open(); }),
+      ui.roundBtn('filter', 'Filter by category', () => { closePanel(); Pz.search.openFilter(); }),
       ui.roundBtn('plus', 'Add item', () => Pz.itemSheet.open({ date: addDate() }), 'filled')
     ]);
     let title, cls = '';
@@ -77,14 +77,17 @@
   function renderView(keepScroll) {
     today = D.today();
     const top = keepScroll ? scroller().scrollTop : null;
+    const todoBox = viewEl.querySelector('.day-todos .card'), todoTop = keepScroll && todoBox ? todoBox.scrollTop : 0;
     viewEl.innerHTML = '';
     viewEl.className = 'cal-view ' + view + (panel ? ' panel-open' : '');
     if (view === 'month') renderMonth();
     else if (view === 'week') renderWeek();
     else if (view === 'day') renderDay();
     else renderAgenda();
-    if (top != null) scroller().scrollTop = top;
-    else if (view === 'week' || view === 'day') {
+    if (top != null) {
+      scroller().scrollTop = top;
+      const box = viewEl.querySelector('.day-todos .card'); if (box) box.scrollTop = todoTop;
+    } else if (view === 'week' || view === 'day') {
       // Start around 08:00, or around now if today is showing
       const s = scroller(), hourH = +s.firstChild.dataset.h;
       const showsToday = view === 'day' ? cursor === today : D.monday(cursor) === D.monday(today);
@@ -92,7 +95,7 @@
     } else viewEl.scrollTop = 0;
   }
 
-  // Month: the "open grid" – a coloured line per item, no titles.
+  // Month: the "open grid" – a coloured line per item, no titles, and a small count of unfinished to-dos.
   function renderMonth() {
     const first = cursor.slice(0, 8) + '01', month = first.slice(0, 7);
     const card = h('div', { class: 'month-card' });
@@ -100,19 +103,27 @@
     while (day.slice(0, 7) <= month) {
       const row = h('div', { class: 'month-row' });
       for (let i = 0; i < 7; i++, day = D.addDays(day, 1)) {
-        const date = day, occ = I.onDay(date);
+        const date = day, occ = I.onDay(date), left = Pz.todos.leftCount(date);
         row.appendChild(h('button', {
-          type: 'button', 'data-day': date, 'aria-label': D.long(date) + ', ' + occ.length + ' items',
+          type: 'button', 'data-day': date, 'aria-label': D.long(date) + ', ' + plural(occ.length, 'item', 'items') + ', ' + plural(left, 'to-do', 'to-dos') + ' left',
           class: 'month-day' + (date.slice(0, 7) !== month ? ' out' : '') + (date === today ? ' today' : '') + (date === panelDate ? ' sel' : ''),
           onclick: () => { if (panelDate === date) closePanel(); else openPanel(date); }
         }, [
           h('span', { class: 'num', text: String(D.dayNum(date)) }),
+          left > 0 && h('span', { class: 'badge', text: String(left) }),
           h('div', { class: 'lines' }, occ.slice(0, 6).map(o => h('i', { class: o.done ? 'done' : '', style: { background: o.color } })))
         ]));
       }
       card.appendChild(row);
     }
     viewEl.appendChild(card);
+  }
+
+  // The countdown chip on a deadline ("3 days"; orange, then red). Nothing once ticked or passed.
+  function countdownChip(o) {
+    if (o.type !== 'deadline' || o.done) return null;
+    const cd = I.countdown(o.startDate);
+    return cd && h('span', { class: 'cd-chip ' + cd.level, text: cd.text });
   }
 
   // One row for an item, used in the day panel and the Agenda.
@@ -130,17 +141,29 @@
     const row = h('div', { class: 'item-row' + (o.done ? ' done' : ''), role: 'button', onclick: () => openItem(o) }, [
       agenda && h('span', { class: 'when' }, o.type === 'allday' ? [h('small', { text: 'All day' })] : when),
       mark,
-      h('div', { class: 'main' }, [h('div', { class: 'ttl', text: it.title }), sub && h('div', { class: 'sub', text: sub })])
+      h('div', { class: 'main' }, [h('div', { class: 'ttl', text: it.title }), sub && h('div', { class: 'sub', text: sub })]),
+      countdownChip(o)
     ]);
-    return ui.swipeRow(row, () => deleteItem(it.id));
+    return ui.swipeRow(row, () => deleteItem(it.id, o.key));
   }
 
-  function deleteItem(id) {
+  // Delete an item. A repeating one asks "This one only / This and future ones / All" first.
+  // Gives back (as a promise) whether it was deleted.
+  function deleteItem(id, key, confirmFirst) {
     const it = I.get(id);
-    if (!it) return;
-    const undo = I.remove(id);
-    Pz.app.changed();
-    ui.toast('Deleted “' + it.title + '”', 'Undo', () => { undo(); Pz.app.changed(); });
+    if (!it) return Promise.resolve(false);
+    key = key || I.startDate(it);
+    const ask = it.repeat ? Pz.itemSheet.askScope('Delete “' + it.title + '” on ' + D.short(key) + '?')
+      : confirmFirst ? ui.actions({ title: 'Delete “' + it.title + '”?', buttons: [{ label: 'Delete', value: 'all', danger: true }] })
+        : Promise.resolve('all');
+    return ask.then(scope => {
+      if (!scope) { Pz.app.changed(); return false; }       // cancelled: redraw so a swiped row comes back
+      const undo = I.snapshot();
+      I.removeOccurrence(id, key, scope);
+      Pz.app.changed();
+      ui.toast('Deleted “' + it.title + '”', 'Undo', () => { undo(); Pz.app.changed(); });
+      return true;
+    });
   }
 
   // Agenda: upcoming items grouped by date; empty days are skipped.
@@ -230,6 +253,12 @@
   }
 
   function renderDay() {
+    // The day's to-do list sits above the time grid
+    const left = Pz.todos.leftCount(cursor);
+    viewEl.appendChild(h('div', { class: 'day-todos' }, [
+      h('div', { class: 'sec-head' }, [h('h2', { text: 'To-dos' }), h('span', { text: Pz.todos.forDay(cursor).length ? left + ' left' : '' })]),
+      h('div', { class: 'card' }, Pz.todos.rows(cursor))
+    ]));
     const card = h('div', { class: 'tg-card' });
     const allday = I.onDay(cursor).filter(o => o.type === 'allday');
     if (allday.length) card.appendChild(h('div', { class: 'allday-row wide' }, [h('span', { class: 'lbl', text: 'All day' })].concat(allday.map(adPill))));
@@ -239,10 +268,12 @@
 
   // ---------- Day panel ----------
   function fillPanel() {
-    const occ = I.onDay(panelDate);
-    const count = (type, one, many) => { const n = occ.filter(o => o.type === type).length; return n ? n + ' ' + (n === 1 ? one : many) : null; };
-    const summary = [count('event', 'event', 'events'), count('deadline', 'deadline', 'deadlines'), count('allday', 'all-day item', 'all-day items')].filter(Boolean).join(' · ') || 'Nothing planned';
-    const list = h('div', { class: 'panel-list' }, occ.length ? occ.map(o => itemRow(o, false)) : [h('div', { class: 'panel-empty', text: 'Tap + to add something to this day.' })]);
+    const occ = I.onDay(panelDate), todoCount = Pz.todos.forDay(panelDate).length;
+    const count = (type, one, many) => { const n = occ.filter(o => o.type === type).length; return n ? plural(n, one, many) : null; };
+    const summary = [count('event', 'event', 'events'), count('deadline', 'deadline', 'deadlines'), count('allday', 'all-day item', 'all-day items'),
+      todoCount ? plural(todoCount, 'to-do', 'to-dos') : null].filter(Boolean).join(' · ') || 'Nothing planned';
+    const old = panel.querySelector('.panel-list'), keep = old ? old.scrollTop : 0;
+    const list = h('div', { class: 'panel-list' }, occ.map(o => itemRow(o, false)).concat(Pz.todos.rows(panelDate)));
     const grab = h('div', { class: 'panel-grab', role: 'button', 'aria-label': 'Close day panel', onclick: closePanel }, [h('div', { class: 'grabber' })]);
     let startY = null;                       // drag the grabber down to close
     grab.addEventListener('pointerdown', e => { startY = e.clientY; });
@@ -255,6 +286,7 @@
       ui.roundBtn('plus', 'Add to this day', () => Pz.itemSheet.open({ date: panelDate }), 'filled')
     ]));
     panel.appendChild(list);
+    list.scrollTop = keep;
   }
   function markSelected() {
     viewEl.querySelectorAll('.month-day').forEach(b => b.classList.toggle('sel', b.dataset.day === panelDate));
@@ -264,14 +296,15 @@
     if (!panel) {
       panel = h('div', { class: 'day-panel' });
       document.getElementById('panels').appendChild(panel);
-      requestAnimationFrame(() => requestAnimationFrame(() => { if (panel) panel.classList.add('open'); }));
+      Pz.ui.nextFrame(() => { if (panel) panel.classList.add('open'); });
     }
     fillPanel(); markSelected();
+    panel.querySelector('.panel-list').scrollTop = 0;
     viewEl.classList.add('panel-open');
     // If the panel would cover the tapped day, scroll the month up so the day stays visible
     const cell = viewEl.querySelector('.month-day.sel');
     if (cell) {
-      const hidden = cell.getBoundingClientRect().bottom - (viewEl.getBoundingClientRect().bottom + 96 - panel.offsetHeight) + 10;
+      const hidden = cell.getBoundingClientRect().bottom - (document.getElementById('app').getBoundingClientRect().bottom - panel.offsetHeight) + 10;
       if (hidden > 0) viewEl.scrollTop += hidden;
     }
   }
@@ -290,7 +323,7 @@
   }
   // Runs every minute: move the "now" line, and roll over to a new day at midnight.
   function tick() {
-    if (D.today() !== today) { if (cursor === today) cursor = D.today(); render(true); return; }
+    if (D.today() !== today) { if (cursor === today) cursor = D.today(); render(true); if (panel) fillPanel(); return; }
     document.querySelectorAll('.now-line').forEach(n => { n.style.top = D.nowMin() / 60 * +n.closest('.tg').dataset.h + 'px'; });
   }
 
