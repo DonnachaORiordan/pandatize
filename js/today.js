@@ -93,6 +93,8 @@
     progBox.innerHTML = ''; habitBox.innerHTML = '';
     const bar = Pz.habitsView.progressBar(today, 'Daily habits');
     if (bar) progBox.appendChild(bar);
+    const perfect = Pz.celebrate.perfectCard(today);          // "Perfect day!" while every daily habit is done
+    if (perfect) progBox.appendChild(perfect);
     habitBox.appendChild(head('Habits', h('span', { text: shown.length ? shown.filter(x => H.isDone(x, today)).length + ' of ' + shown.length : '' })));
     habitBox.appendChild(shown.length ? Pz.habitsView.tiles() : Pz.habitsView.emptyState());
   }

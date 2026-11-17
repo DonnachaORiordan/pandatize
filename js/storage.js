@@ -107,8 +107,79 @@
     const fresh = freshData();
     Object.keys(fresh).forEach(k => { if (data[k] === undefined) data[k] = fresh[k]; });
     Object.keys(fresh.settings).forEach(k => { if (data.settings[k] === undefined) data.settings[k] = fresh.settings[k]; });
-    data.lists.forEach(l => { delete l.pinned; });        // lists can't be pinned (only the notes and to-dos inside them)
+    if (!data.habitMeta.milestones) data.habitMeta.milestones = {};
+    if (!Array.isArray(data.habitMeta.perfectDays)) data.habitMeta.perfectDays = [];
+    if (!data.reminders.dismissed) data.reminders.dismissed = {};
+    if (!data.reminders.shown) data.reminders.shown = {};
+    data.lists.forEach(l => { delete l.pinned; if (!Array.isArray(l.entries)) l.entries = []; });   // lists can't be pinned (only the notes and to-dos inside them)
     return data;
+  }
+
+  // ---------- Backups (build step 5) ----------
+  // A backup file is simply ALL the data written out as text (JSON), plus the moment it was made.
+  const backupName = () => 'pandatize-backup-' + Pz.dates.today() + '.json';
+  const exportText = () => JSON.stringify(Object.assign({}, Pz.data, { exportedAt: new Date().toISOString() }));
+  const markExported = () => { Pz.data.settings.lastExport = new Date().toISOString(); save(); };
+
+  // Read a backup file's text. Gives back { data } if it's a real Pandatize backup, or { error: 'message' }.
+  const COLLECTIONS = ['habits', 'categories', 'items', 'todos', 'lists'];
+  const isObj = x => !!x && typeof x === 'object' && !Array.isArray(x);
+  function readBackup(text) {
+    let d;
+    try { d = JSON.parse(text); } catch (e) { return { error: 'This file isn’t a Pandatize backup, so nothing was changed.' }; }
+    if (!isObj(d) || d.app !== 'pandatize' || typeof d.dataVersion !== 'number') return { error: 'This file isn’t a Pandatize backup, so nothing was changed.' };
+    if (d.dataVersion > cfg.dataVersion) return { error: 'This backup was made by a newer version of Pandatize. Update the app first, then try again.' };
+    const broken = { error: 'This backup looks damaged, so nothing was changed.' };
+    if (d.dataVersion < 1 || (d.dataVersion < cfg.dataVersion && !converters[d.dataVersion])) return broken;
+    if (COLLECTIONS.some(k => d[k] !== undefined && !Array.isArray(d[k]))) return broken;
+    if (['settings', 'habitMeta', 'reminders'].some(k => d[k] !== undefined && !isObj(d[k]))) return broken;
+    const exportedAt = d.exportedAt || null;
+    delete d.exportedAt;
+    d = upgrade(d);                                                     // old versions are converted here
+    if (COLLECTIONS.some(k => d[k].some(x => !isObj(x) || typeof x.id !== 'string'))) return broken;
+    return { data: d, exportedAt: exportedAt };
+  }
+
+  // "Replace everything": the backup becomes the data. Gives back an undo function.
+  function replaceWith(d) {
+    const old = Pz.data;
+    if (old.settings.lastExport && (!d.settings.lastExport || old.settings.lastExport > d.settings.lastExport)) d.settings.lastExport = old.settings.lastExport;
+    Pz.data = d; save();
+    return () => { Pz.data = old; save(); };
+  }
+
+  // "Add what's missing": anything in the backup that isn't here yet is added; nothing here is
+  // changed or removed (a habit that's in both gets any ticks it is missing). Gives back { added, undo }.
+  function mergeIn(src) {
+    const before = JSON.stringify(Pz.data), cur = Pz.data;
+    let added = 0;
+    const ids = arr => new Set(arr.map(x => x.id));
+    ['categories', 'items', 'todos'].forEach(k => {
+      const have = ids(cur[k]);
+      src[k].forEach(x => { if (!have.has(x.id)) { cur[k].push(x); added++; } });
+    });
+    src.habits.forEach(x => {
+      const mine = cur.habits.find(y => y.id === x.id);
+      if (!mine) { cur.habits.push(x); added++; return; }
+      const ticks = new Set(mine.done);
+      (x.done || []).forEach(d => { if (!ticks.has(d)) { ticks.add(d); added++; } });
+      mine.done = Array.from(ticks).sort();
+      mine.best = Math.max(mine.best || 0, x.best || 0);
+    });
+    src.lists.forEach(l => {
+      const mine = cur.lists.find(y => y.id === l.id);
+      if (!mine) { cur.lists.push(l); added++; return; }
+      const have = ids(mine.entries);
+      l.entries.forEach(e => { if (!have.has(e.id)) { mine.entries.push(e); added++; } });
+    });
+    // Celebrations already shown and reminders already dismissed stay that way
+    Object.keys(src.habitMeta.milestones).forEach(id => {
+      cur.habitMeta.milestones[id] = Array.from(new Set((cur.habitMeta.milestones[id] || []).concat(src.habitMeta.milestones[id] || [])));
+    });
+    cur.habitMeta.perfectDays = Array.from(new Set(cur.habitMeta.perfectDays.concat(src.habitMeta.perfectDays))).sort();
+    cur.reminders.dismissed = Object.assign({}, src.reminders.dismissed, cur.reminders.dismissed);
+    save();
+    return { added: added, undo: () => { Pz.data = JSON.parse(before); save(); } };
   }
 
   function load() {
@@ -130,5 +201,6 @@
     catch (e) { return false; }
   }
 
-  Pz.storage = { load: load, save: save, uid: uid, freshData: freshData, upgrade: upgrade };
+  Pz.storage = { load: load, save: save, uid: uid, freshData: freshData, upgrade: upgrade,
+    backupName: backupName, exportText: exportText, markExported: markExported, readBackup: readBackup, replaceWith: replaceWith, mergeIn: mergeIn };
 })();

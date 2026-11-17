@@ -70,6 +70,7 @@
         d.eDate = end.slice(0, 10); d.eTime = end.slice(11);
       }
       renderMain();
+      main.querySelectorAll('.pills').forEach(p => Pz.fx.flash(p.closest('.row')));    // briefly highlight the time rows that changed
     }
 
     // ---- Category, times, location ----

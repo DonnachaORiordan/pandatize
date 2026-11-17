@@ -57,7 +57,6 @@
 .item-row .ttl { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item-row .sub { font-size: 13px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 1px; }
 .item-row.done { opacity: .5; }
-.item-row.done .ttl { text-decoration: line-through; }
 .swipe-row + .swipe-row { border-top: 1px solid var(--hair); }
 
 /* ---------- Agenda ---------- */

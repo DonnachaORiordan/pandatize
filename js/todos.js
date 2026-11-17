@@ -93,12 +93,12 @@
     } else if (t.origDate && t.origDate < t.date) {
       chip = h('span', { class: 'todo-chip' }, [h('span', { text: '→ Carried over from ' + D.dayName(t.origDate).slice(0, 3) })]);
     }
-    const el = h('div', { class: 'todo-row' + (t.done ? ' done' : ''), role: 'button', onclick: () => {
+    const el = h('div', { class: 'todo-row' + (t.done ? ' done' : ''), 'data-todo': t.id, role: 'button', onclick: () => {
       if (isAuto(t)) { const it = Pz.items.get(t.source.itemId); if (it) Pz.itemSheet.open({ id: it.id, key: t.source.occ }); } else openEdit(t);
     } }, [
       h('button', { type: 'button', class: 'todo-check', role: 'checkbox', 'aria-checked': String(t.done), 'aria-label': t.title,
-        onclick: e => { e.stopPropagation(); T.toggle(t); Pz.app.changed(); } }, [Pz.icon('check', 14)]),
-      h('div', { class: 'main' }, [h('div', { class: 'ttl', text: t.title }), chip])
+        onclick: e => { e.stopPropagation(); T.toggle(t); Pz.app.changed(); Pz.fx.todoTick('.todo-row[data-todo="' + t.id + '"]', t.done); } }, [Pz.icon('check', 14)]),
+      h('div', { class: 'main' }, [h('div', { class: 'ttl' }, [h('span', { class: 'strike', text: t.title })]), chip])
     ]);
     return ui.swipeRow(el, () => {
       const undo = T.remove(t.id);
@@ -110,10 +110,10 @@
   // A list to-do showing in a day list: tagged with its list's name and colour.
   function listRow(x, day) {
     const e = x.entry, l = x.list;
-    const el = h('div', { class: 'todo-row' + (e.done ? ' done' : ''), role: 'button', onclick: () => Pz.lists.editEntry(e.id) }, [
+    const el = h('div', { class: 'todo-row' + (e.done ? ' done' : ''), 'data-entry': e.id, role: 'button', onclick: () => Pz.lists.editEntry(e.id) }, [
       h('button', { type: 'button', class: 'todo-check', role: 'checkbox', 'aria-checked': String(e.done), 'aria-label': e.title,
-        onclick: ev => { ev.stopPropagation(); Pz.lists.toggle(e); Pz.app.changed(); } }, [Pz.icon('check', 14)]),
-      h('div', { class: 'main' }, [h('div', { class: 'ttl', text: e.title }), h('div', { class: 'todo-chips' }, [
+        onclick: ev => { ev.stopPropagation(); Pz.lists.toggle(e); Pz.app.changed(); Pz.fx.todoTick('[data-entry="' + e.id + '"]', e.done); } }, [Pz.icon('check', 14)]),
+      h('div', { class: 'main' }, [h('div', { class: 'ttl' }, [h('span', { class: 'strike', text: e.title })]), h('div', { class: 'todo-chips' }, [
         h('span', { class: 'todo-chip' }, [h('i', { style: { background: l.color } }), h('span', { text: l.name + (e.dueTime ? ' · ' + e.dueTime : '') })]),
         !e.done && e.due < day && h('span', { class: 'todo-chip' }, [h('span', { text: '→ Carried over from ' + D.dayName(e.due).slice(0, 3) })])
       ])])
@@ -149,8 +149,10 @@
       h('div', { class: 'group' }, [ui.row('Day', Pz.itemSheet.pill('date', date, v => { date = v; }, { label: 'Day' }).el)]),
       h('button', { type: 'button', class: 'delete-btn', text: 'Delete', onclick: () => {
         sheet.close();
-        const undo = T.remove(t.id); Pz.app.changed();
-        ui.toast('Deleted “' + t.title + '”', 'Undo', () => { undo(); Pz.app.changed(); });
+        Pz.fx.fadeAway(Array.from(document.querySelectorAll('.todo-row[data-todo="' + t.id + '"]')).map(r => r.closest('.swipe-row') || r)).then(() => {
+          const undo = T.remove(t.id); Pz.app.changed();
+          ui.toast('Deleted “' + t.title + '”', 'Undo', () => { undo(); Pz.app.changed(); });
+        });
       } })
     ]), onSave: close => {
       if (!title.trim()) { ui.toast('Give it a title first'); input.focus(); return; }

@@ -33,14 +33,14 @@
 .entry-card .meta { font-size: 13px; color: var(--text2); margin-top: 3px; }
 .entry-card .meta.overdue { color: var(--red); }
 .entry-card .side { display: flex; align-items: center; gap: 8px; padding-top: 4px; flex: none; }
-.entry-card.done .ttl { text-decoration: line-through; color: var(--text2); }
+.entry-card.done .ttl { color: var(--text2); }
 .note-ic { width: 24px; display: flex; justify-content: center; color: var(--text2); padding-top: 2px; flex: none; }
 .note-body { font-size: 14px; color: var(--text2); margin-top: 3px; white-space: pre-line; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
 .subs { margin-top: 8px; display: flex; flex-direction: column; gap: 2px; }
 .sub-row { display: flex; align-items: center; gap: 9px; min-height: 30px; font-size: 14px; width: 100%; }
 .sub-check { width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid var(--check); display: flex; align-items: center; justify-content: center; color: transparent; flex: none; }
 .sub-row.done .sub-check { background: var(--text2); border-color: var(--text2); color: var(--card); }
-.sub-row.done span:last-child { text-decoration: line-through; color: var(--text2); }
+.sub-row.done span:last-child { color: var(--text2); }
 .todo-check.small { width: 22px; height: 22px; }
 .todo-check.small.on { background: var(--text); border-color: var(--text); color: var(--on-text); }
 .notes-box.tall { min-height: 220px; }

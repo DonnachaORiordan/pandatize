@@ -34,9 +34,13 @@
   const dueText = e => D.short(e.due) + (e.dueTime ? ' · ' + e.dueTime : '');
 
   function deleteEntry(list, e) {
-    const undo = L.removeEntry(list, e);
-    Pz.app.changed();
-    ui.toast('Deleted “' + (e.title || 'Note') + '”', 'Undo', () => { undo(); Pz.app.changed(); });
+    // A gentle fade first (a row that was swiped away has already faded), then it's removed
+    const els = Array.from(document.querySelectorAll('[data-entry="' + e.id + '"]')).map(x => x.closest('.swipe-row') || x);
+    Pz.fx.fadeAway(els).then(() => {
+      const undo = L.removeEntry(list, e);
+      Pz.app.changed();
+      ui.toast('Deleted “' + (e.title || 'Note') + '”', 'Undo', () => { undo(); Pz.app.changed(); });
+    });
   }
 
   // The quick pin button: hollow when not pinned, filled when pinned. One tap flips it.
@@ -178,13 +182,13 @@
       inner = [
         h('button', { type: 'button', class: 'todo-check', role: 'checkbox', 'aria-checked': String(e.done), 'aria-label': e.title,
           style: e.done ? { background: l.color, borderColor: l.color, color: Pz.glyphOn(l.color) } : null,
-          onclick: ev => { ev.stopPropagation(); L.toggle(e); Pz.app.changed(); } }, [Pz.icon('check', 14)]),
+          onclick: ev => { ev.stopPropagation(); L.toggle(e); Pz.app.changed(); Pz.fx.todoTick('[data-entry="' + e.id + '"]', e.done); } }, [Pz.icon('check', 14)]),
         h('div', { class: 'main' }, [
-          h('div', { class: 'ttl', text: e.title }),
+          h('div', { class: 'ttl' }, [h('span', { class: 'strike', text: e.title })]),
           meta.length > 0 && h('div', { class: 'meta' + (e.due && !e.done && e.due < today ? ' overdue' : ''), text: meta.join(' · ') }),
-          subs.length > 0 && h('div', { class: 'subs' }, subs.map(s => h('button', { type: 'button', class: 'sub-row' + (s.done ? ' done' : ''), role: 'checkbox', 'aria-checked': String(s.done),
-            onclick: ev => { ev.stopPropagation(); s.done = !s.done; e.updated = stamp(); Pz.storage.save(); Pz.app.changed(); } },
-            [h('span', { class: 'sub-check' }, [Pz.icon('check', 10)]), h('span', { text: s.title })])))
+          subs.length > 0 && h('div', { class: 'subs' }, subs.map(s => h('button', { type: 'button', class: 'sub-row' + (s.done ? ' done' : ''), 'data-sub': s.id, role: 'checkbox', 'aria-checked': String(s.done),
+            onclick: ev => { ev.stopPropagation(); s.done = !s.done; e.updated = stamp(); Pz.storage.save(); Pz.app.changed(); Pz.fx.todoTick('.sub-row[data-sub="' + s.id + '"]', s.done); } },
+            [h('span', { class: 'sub-check' }, [Pz.icon('check', 10)]), h('span', { class: 'strike', text: s.title })])))
         ]),
         h('div', { class: 'side' }, [
           e.priority && h('span', { style: { color: PRIORITY[e.priority] }, 'aria-label': e.priority + ' priority' }, [Pz.icon('flagFill', 16)]),
@@ -202,7 +206,7 @@
         h('div', { class: 'side' }, [pinBtn(e, e.title || 'note')])
       ];
     }
-    const wrap = ui.swipeRow(h('div', { class: 'entry-card' + (isDone(e) ? ' done' : ''), role: 'button', onclick: () => openEntry(l, e) }, inner), () => deleteEntry(l, e));
+    const wrap = ui.swipeRow(h('div', { class: 'entry-card' + (isDone(e) ? ' done' : ''), 'data-entry': e.id, role: 'button', onclick: () => openEntry(l, e) }, inner), () => deleteEntry(l, e));
     wrap.classList.add('entry-wrap');
     wrap.setAttribute('data-reorder', '');
     return wrap;

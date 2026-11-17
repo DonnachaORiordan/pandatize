@@ -13,7 +13,7 @@
 .todo-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--check); flex: none; display: flex; align-items: center; justify-content: center; color: transparent; position: relative; }
 .todo-check::after { content: ''; position: absolute; inset: -11px; }
 .todo-row.done .todo-check { background: var(--text); border-color: var(--text); color: var(--on-text); }
-.todo-row.done .ttl { text-decoration: line-through; color: var(--text2); }
+.todo-row.done .ttl { color: var(--text2); }
 .todo-chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; margin-top: 5px; font-size: 12px; color: var(--text2); background: var(--card2); border-radius: 999px; padding: 2px 9px; }
 .todo-chip i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .todo-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

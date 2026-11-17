@@ -144,10 +144,27 @@
       b.checked && Pz.icon('check', 18)
     ])));
     wrap.appendChild(h('div', { class: 'backdrop', onclick: () => close(undefined) }));
-    wrap.appendChild(h('div', { class: 'as-box' }, [group, h('button', { type: 'button', class: 'as-btn as-cancel', text: 'Cancel', onclick: () => close(undefined) })]));
+    wrap.appendChild(h('div', { class: 'as-box' }, [group, !opts.noCancel && h('button', { type: 'button', class: 'as-btn as-cancel', text: 'Cancel', onclick: () => close(undefined) })]));
     modals++;
     mount('sheets', wrap);
   });
+  // A message with just an OK button
+  ui.message = (title, message) => ui.actions({ title: title, message: message, buttons: [{ label: 'OK', value: 'ok' }], noCancel: true });
+
+  // ---- Overlay: a full-screen moment on top of everything (e.g. a streak milestone). Gives back close(). ----
+  ui.overlay = (content, onClose) => {
+    const wrap = h('div', { class: 'overlay' }, [content]);
+    let closed = false;
+    const close = () => {
+      if (closed) return; closed = true; modals--;
+      wrap.classList.remove('open');
+      setTimeout(() => wrap.remove(), 320);
+      if (onClose) onClose();
+    };
+    modals++;
+    mount('app', wrap);
+    return close;
+  };
 
   // ---- Panel: a shorter slide-up box with a title and a list (e.g. Reminders). Tap outside to close. ----
   ui.panel = (title, actionLabel, onAction, onClose) => {

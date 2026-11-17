@@ -45,6 +45,22 @@
 
     setInterval(() => tick(false), 60000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(true); });
+    startOffline();
+  }
+
+  // Offline support: switch on the service worker (sw.js). It only works on the live
+  // https:// site, not when index.html is opened by double-clicking, so it's skipped there.
+  function startOffline() {
+    if (!('serviceWorker' in navigator) || !/^https:$|^http:$/.test(location.protocol)) return;
+    const hadOne = !!navigator.serviceWorker.controller;          // false on the very first visit
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // Look for a new version each time the app comes back to the front
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+    }).catch(() => { /* no offline copy this time; the app still works online */ });
+    // A new version has just been saved: offer to switch to it now (it is used next time anyway).
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadOne) Pz.ui.toast(Pz.config.appName + ' has been updated', 'Reload', () => location.reload());
+    });
   }
 
   Pz.app = { changed: changed, listen: listen };

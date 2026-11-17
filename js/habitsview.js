@@ -14,19 +14,27 @@
   const flame = () => h('span', { class: 'flame' }, [Pz.icon('flame', 14)]);
 
   // The tick box: an outline in the habit's colour, filled with a check when done.
+  // (The data-… labels let the animations find it again after the screen is redrawn.)
   const tickBox = (hb, date, size) => {
     const done = H.isDone(hb, date);
     return h('button', { type: 'button', class: 'habit-tick' + (done ? ' on' : ''), role: 'checkbox', 'aria-checked': String(done), 'aria-label': hb.title,
+      'data-habit': hb.id, 'data-date': date,
       style: { width: size + 'px', height: size + 'px', borderColor: hb.color, background: done ? hb.color : 'transparent', color: done ? Pz.glyphOn(hb.color) : 'transparent' },
-      onclick: e => { e.stopPropagation(); H.toggle(hb, date); Pz.app.changed(); } }, [Pz.icon('check', Math.round(size * 0.56))]);
+      onclick: e => { e.stopPropagation(); Pz.celebrate.tickHabit(hb, date); } }, [Pz.icon('check', Math.round(size * 0.56))]);
   };
-  const strip = (hb, n) => h('div', { class: 'h-strip' }, H.history(hb, n).map(state => h('i', { class: state })));
+  const strip = (hb, n) => {
+    const today = D.today();
+    return h('div', { class: 'h-strip' }, H.history(hb, n).map((state, i) => h('i', { class: state, 'data-day': D.addDays(today, i - n + 1) })));
+  };
 
-  // "5 day streak · Best 12" / "No streak yet · Best 12" / "4 weeks in a row · Best 6"
-  function streakText(hb) {
-    const s = H.streak(hb), weekly = H.isWeekly(hb);
-    const now = !s ? 'No streak yet' : weekly ? plural(s, 'week', 'weeks') + ' in a row' : s + ' day streak';
-    return now + ' · Best ' + H.best(hb);
+  // The streak words: "5 day streak" / "No streak yet" / "4 weeks in a row" on a card; "5 days" on a Today tile.
+  V.streakWords = (hb, s, kind) => {
+    if (kind === 'tile') return s ? plural(s, 'day', 'days') : 'No streak yet';
+    return !s ? 'No streak yet' : H.isWeekly(hb) ? plural(s, 'week', 'weeks') + ' in a row' : s + ' day streak';
+  };
+  // "5 day streak · Best 12". The first part is its own piece so it can roll like a counter.
+  function streakText(hb, live) {
+    return [h('span', { 'data-streak': live ? hb.id : null, 'data-kind': 'card', text: V.streakWords(hb, H.streak(hb), 'card') }), ' · Best ' + H.best(hb)];
   }
   // "2 of 3 this week" with small pips
   function weekLine(hb, date) {
@@ -39,9 +47,9 @@
   V.progressBar = (date, label) => {
     const p = H.dayProgress(date);
     if (!p.total) return null;
-    const fill = p.done ? p.colors.map(c => h('i', { style: { background: c, width: 'calc(' + (100 / p.total) + '% - 2px)' } }))      // one segment per done habit, 2px gaps
+    const fill = p.done ? p.doneHabits.map(x => h('i', { 'data-habit': x.id, style: { background: x.color, width: 'calc(' + (100 / p.total) + '% - 2px)' } }))      // one segment per done habit, 2px gaps
       : [h('i', { class: 'sliver' })];                                                                                              // nothing done yet: a small 3% sliver
-    return h('div', { class: 'progress', role: 'progressbar', 'aria-valuenow': String(p.pct), 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': 'Daily habits' }, [
+    return h('div', { class: 'progress', 'data-date': date, role: 'progressbar', 'aria-valuenow': String(p.pct), 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': 'Daily habits' }, [
       h('div', { class: 'progress-top' }, [h('span', { text: label }), h('span', { text: p.done + ' of ' + p.total + ' · ' + p.pct + '%' })]),
       h('div', { class: 'progress-track' }, fill)
     ]);
@@ -61,11 +69,11 @@
     const today = D.today();
     const tiles = H.shown().map(hb => {
       const done = H.isDone(hb, today);
-      return h('div', { class: 'habit-tile card' + (done ? ' done' : ''), style: { '--hc': hb.color }, role: 'button', onclick: () => Pz.nav.go('habits') }, [
+      return h('div', { class: 'habit-tile card' + (done ? ' done' : ''), 'data-habit-card': hb.id, style: { '--hc': hb.color }, role: 'button', onclick: () => Pz.nav.go('habits') }, [
         h('div', { class: 'ht-top' }, [iconSq(hb, 34), tickBox(hb, today, 30)]),
         h('div', { class: 'ht-title', text: hb.title }),
         H.isWeekly(hb) ? h('div', { class: 'h-sub', text: Math.min(H.weekCount(hb, today), hb.freq.times) + ' of ' + hb.freq.times + ' this week' })
-          : h('div', { class: 'h-sub' }, [flame(), h('span', { text: H.streak(hb) ? plural(H.streak(hb), 'day', 'days') : 'No streak yet' })]),
+          : h('div', { class: 'h-sub' }, [flame(), h('span', { 'data-streak': hb.id, 'data-kind': 'tile', text: V.streakWords(hb, H.streak(hb), 'tile') })]),
         strip(hb, 7)
       ]);
     });
@@ -108,13 +116,13 @@
     // Habit cards
     const cards = h('div', { class: 'habit-cards' }, habits.map(hb => {
       const done = H.isDone(hb, sel);
-      return h('div', { class: 'habit-card card' + (done ? ' done' : ''), style: { '--hc': hb.color }, 'data-reorder': '', role: 'button', onclick: () => openSheet(hb) }, [
+      return h('div', { class: 'habit-card card' + (done ? ' done' : ''), 'data-habit-card': hb.id, style: { '--hc': hb.color }, 'data-reorder': '', role: 'button', onclick: () => openSheet(hb) }, [
         h('div', { class: 'hc-top' }, [
           iconSq(hb, 40),
           h('div', { class: 'main' }, [
             h('div', { class: 'hc-title', text: hb.title }),
             H.isWeekly(hb) && weekLine(hb, sel),
-            h('div', { class: 'h-sub' }, [flame(), h('span', { text: streakText(hb) })])
+            h('div', { class: 'h-sub' }, [flame(), h('span', null, streakText(hb, true))])
           ]),
           tickBox(hb, sel, 32)
         ]),
@@ -148,9 +156,13 @@
   function removeHabit(hb) {
     ui.actions({ title: 'Delete ' + hb.title + '?', message: 'Its history will go with it.', buttons: [{ label: 'Delete', value: 'yes', danger: true }] }).then(ok => {
       if (!ok) return;
-      const at = Pz.data.habits.indexOf(hb);
-      Pz.data.habits.splice(at, 1); Pz.storage.save(); Pz.app.changed();
-      ui.toast('Deleted “' + hb.title + '”', 'Undo', () => { Pz.data.habits.splice(Math.min(at, Pz.data.habits.length), 0, hb); Pz.storage.save(); Pz.app.changed(); });
+      // A gentle fade first, then it's removed
+      Pz.fx.fadeAway(document.querySelectorAll('[data-habit-card="' + hb.id + '"]')).then(() => {
+        const at = Pz.data.habits.indexOf(hb);
+        if (at < 0) return;
+        Pz.data.habits.splice(at, 1); Pz.storage.save(); Pz.app.changed();
+        ui.toast('Deleted “' + hb.title + '”', 'Undo', () => { Pz.data.habits.splice(Math.min(at, Pz.data.habits.length), 0, hb); Pz.storage.save(); Pz.app.changed(); });
+      });
     });
   }
   function archive(hb, on) {
@@ -172,7 +184,7 @@
         h('div', { class: 'hc-top' }, [iconSq(fake, 40), h('div', { class: 'main' }, [
           h('div', { class: 'hc-title', text: fake.title }),
           d.freq.type === 'weekly' && weekLine(fake, D.today()),
-          h('div', { class: 'h-sub' }, [flame(), h('span', { text: streakText(fake) })])
+          h('div', { class: 'h-sub' }, [flame(), h('span', null, streakText(fake, false))])
         ]), h('span', { class: 'habit-tick', style: { width: '32px', height: '32px', borderColor: d.color } })]),
         strip(fake, 20)
       ]));

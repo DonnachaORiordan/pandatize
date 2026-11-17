@@ -1,0 +1,160 @@
+/* motion.css – build step 5: how every animation looks (DESIGN.md sections 9 and 10).
+   Ground rule: the more often something happens, the smaller and faster its animation.
+   Ticks are short and subtle (about 0.25 s); the big show is only for a perfect day,
+   streak milestones and finishing a deadline. Nothing moves at a constant speed.
+   js/fx.js and js/celebrate.js decide WHEN these play. The "Reduce Motion" rules are at the end. */
+
+/* ---------- Sheets and panels spring up: they overshoot a little and settle back ---------- */
+.sheet-wrap.open .sheet, .sheet-wrap.open .as-box, .day-panel.open { animation: pzSpringUp .52s both; }
+@keyframes pzSpringUp {
+  0%   { transform: translateY(100%); animation-timing-function: cubic-bezier(.2,.75,.35,1); }
+  62%  { transform: translateY(-9px);  animation-timing-function: ease-in-out; }
+  84%  { transform: translateY(2px);   animation-timing-function: ease-in-out; }
+  100% { transform: translateY(0); }
+}
+/* The sheet's colour carries on below its bottom edge, so no gap shows while it overshoots */
+.sheet::after, .day-panel::after { content: ''; position: absolute; left: 0; right: 0; top: calc(100% - 1px); height: 40px; background: inherit; pointer-events: none; }
+
+/* ---------- Habit ticks ---------- */
+/* Squash: the tick box squeezes slightly while pressed… */
+.habit-tick, .todo-check, .sub-check, .flag-btn { transition: transform .08s ease-out; }
+.habit-tick:active, .todo-check:active, .flag-btn:active { transform: scale(.86); }
+/* …then springs back slightly bigger as it fills */
+.fx-tick, .fx-check { animation: pzTickPop .26s both; }
+@keyframes pzTickPop {
+  0%   { transform: scale(.86); animation-timing-function: cubic-bezier(.3,.7,.4,1); }
+  55%  { transform: scale(1.14); animation-timing-function: ease-in-out; }
+  100% { transform: scale(1); }
+}
+.fx-untick, .fx-uncheck { animation: pzSoftPop .2s ease-out both; }
+@keyframes pzSoftPop { from { transform: scale(.9); } }
+
+/* The card fills with its colour and pops (then settles) */
+.fx-cardon { animation: pzCardPop .26s ease-in-out, pzFillIn .26s ease-out; }
+.fx-cardoff { animation: pzFillOut .22s ease-out; }
+@keyframes pzCardPop { 0% { transform: scale(1); } 45% { transform: scale(1.025); } 100% { transform: scale(1); } }
+@keyframes pzFillIn { from { background-color: var(--card); } }
+@keyframes pzFillOut { from { background-color: color-mix(in srgb, var(--hc) var(--tint), var(--card)); } }
+
+/* That day's square flies in along a curve (js/fx.js), then pops into the strip a moment later */
+.fx-flyer { position: absolute; left: 0; top: 0; z-index: 75; border-radius: 4px; pointer-events: none; will-change: transform; }
+.h-strip i.fx-land { animation: pzLand .26s both; }
+.h-strip i.fx-land.after-fly { animation-delay: .34s; }
+@keyframes pzLand {
+  0%   { transform: scale(0); opacity: 0; animation-timing-function: cubic-bezier(.3,.7,.4,1); }
+  60%  { transform: scale(1.3); opacity: 1; animation-timing-function: ease-in-out; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* The streak rolls like a counter (up when it grows, down when it shrinks)… */
+.roll { display: inline-grid; overflow: hidden; vertical-align: bottom; }
+.roll > span { grid-area: 1 / 1; white-space: nowrap; }
+.roll .old { animation: pzRollOut .3s ease-in-out both; }
+.roll .new { animation: pzRollIn .3s ease-in-out both; }
+.roll.down .old { animation-name: pzRollOutDown; }
+.roll.down .new { animation-name: pzRollInDown; }
+@keyframes pzRollOut { to { transform: translateY(-100%); opacity: 0; } }
+@keyframes pzRollIn { from { transform: translateY(100%); opacity: 0; } }
+@keyframes pzRollOutDown { to { transform: translateY(100%); opacity: 0; } }
+@keyframes pzRollInDown { from { transform: translateY(-100%); opacity: 0; } }
+/* …and the flame beside it gives a small flicker */
+.flame.fx-flicker { animation: pzFlicker .45s ease-in-out; transform-origin: 50% 85%; }
+@keyframes pzFlicker {
+  0% { transform: none; } 25% { transform: scale(1.25) rotate(-8deg); } 50% { transform: scale(.95) rotate(6deg); }
+  75% { transform: scale(1.1) rotate(-3deg); } 100% { transform: none; }
+}
+
+/* The progress bar slides: a new segment grows in, a removed one shrinks away */
+.progress-track i.fx-grow { animation: pzGrowW .28s cubic-bezier(.3,.7,.4,1) both; }
+.progress-track i.fx-shrink { animation: pzShrinkW .24s ease-in-out both; }
+@keyframes pzGrowW { from { width: 0; } }
+@keyframes pzShrinkW { to { width: 0; opacity: .3; } }
+
+/* ---------- To-dos: the strike-through line draws across from left to right ---------- */
+.strike {
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 56% / 0 1.5px;
+}
+.todo-row.done .strike, .entry-card.done .ttl .strike, .sub-row.done .strike, .item-row.done .strike { background-size: 100% 1.5px; }
+.strike.fx-strike { animation: pzStrike .3s ease-in-out both; }
+@keyframes pzStrike { from { background-size: 0 1.5px; } to { background-size: 100% 1.5px; } }
+
+/* ---------- Perfect day! (Today, under the progress bar) ---------- */
+.perfect-card { margin-top: 14px; padding: 18px 16px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.pc-ring { position: relative; width: 68px; height: 68px; }
+.pc-ring svg { display: block; }
+.pc-check { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text); }
+.pc-title { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; margin-top: 10px; }
+.pc-sub { font-size: 14px; color: var(--text2); margin-top: 4px; max-width: 290px; line-height: 1.35; }
+/* Staging: the bar fills first, THEN the card appears (confetti follows, from js/celebrate.js) */
+.perfect-card.fx-in { animation: pzCardIn .5s .26s both; }
+.perfect-card.fx-in .pc-ring svg { animation: pzRingIn .6s cubic-bezier(.3,.7,.4,1) .3s both; }
+@keyframes pzCardIn {
+  0%   { opacity: 0; transform: translateY(-8px) scale(.92); animation-timing-function: cubic-bezier(.3,.7,.4,1); }
+  60%  { opacity: 1; transform: translateY(0) scale(1.03); animation-timing-function: ease-in-out; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes pzRingIn { from { transform: rotate(-120deg) scale(.7); opacity: 0; } }
+
+/* ---------- Streak milestone (7, 30, 100): a full-screen moment ---------- */
+.overlay { position: absolute; inset: 0; z-index: 80; opacity: 0; transition: opacity .25s ease; }
+.overlay.open { opacity: 1; }
+.milestone {
+  position: absolute; inset: 0; display: flex; flex-direction: column; padding-top: var(--safe-top);
+  background: radial-gradient(70% 42% at 50% 30%, rgba(255,159,10,.20), rgba(255,159,10,0) 70%), var(--bg);
+}
+.ms-top { display: flex; justify-content: flex-end; padding: 4px 16px; min-height: 52px; }
+.ms-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 28px calc(64px + var(--safe-bottom)); }
+.ms-flame { position: relative; color: #FF9F0A; filter: drop-shadow(0 10px 30px rgba(255,159,10,.35)); }
+.ms-num { position: absolute; left: 0; right: 0; top: 57%; transform: translateY(-50%); font-size: 36px; font-weight: 800; letter-spacing: -0.03em; color: #0B0B0F; }
+.ms-num.three { font-size: 29px; }
+.ms-title { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.ms-habit { display: inline-flex; align-items: center; gap: 10px; margin-top: 14px; font-size: 17px; font-weight: 700; background: var(--card); box-shadow: var(--shadow); border-radius: 999px; padding: 5px 16px 5px 5px; max-width: 100%; }
+.ms-habit span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-msg { color: var(--text2); font-size: 15px; line-height: 1.4; margin-top: 14px; max-width: 290px; }
+.ms-badges { display: flex; gap: 16px; margin-top: 26px; }
+.ms-badge { width: 60px; height: 60px; border-radius: 50%; border: 2px dashed var(--check); color: var(--text2); display: flex; align-items: center; justify-content: center; position: relative; }
+.ms-badge.on { border: 0; }
+.ms-badge b { font-size: 19px; font-weight: 800; }
+.ms-lock { position: absolute; right: -4px; bottom: -4px; width: 22px; height: 22px; border-radius: 50%; background: var(--card2); display: flex; align-items: center; justify-content: center; }
+.ms-go { margin-top: 32px; min-height: 52px; padding: 0 40px; border-radius: 999px; background: var(--text); color: var(--on-text); font-size: 17px; font-weight: 700; }
+/* Anticipation: the flame shrinks very slightly for a split second, then bursts to full size */
+.ms-flame { animation: pzFlameIn .8s both; }
+@keyframes pzFlameIn {
+  0%   { opacity: 0; transform: scale(.95); }
+  16%  { opacity: 1; transform: scale(.95); animation-timing-function: ease-in; }
+  32%  { transform: scale(.86); animation-timing-function: cubic-bezier(.2,.8,.3,1); }
+  66%  { transform: scale(1.14); animation-timing-function: ease-in-out; }
+  100% { opacity: 1; transform: scale(1); }
+}
+.ms-title, .ms-habit, .ms-msg, .ms-badges, .ms-go { animation: pzRise .4s cubic-bezier(.3,.7,.4,1) both; }
+.ms-title { animation-delay: .4s; } .ms-habit { animation-delay: .47s; } .ms-msg { animation-delay: .54s; }
+.ms-badges { animation-delay: .61s; } .ms-go { animation-delay: .68s; }
+@keyframes pzRise { from { opacity: 0; transform: translateY(12px); } }
+
+/* ---------- Confetti (drawn by js/fx.js on this see-through layer) ---------- */
+.confetti { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 90; pointer-events: none; }
+
+/* ---------- Month view: when a month loads, its lines grow in from the left (row by row) ---------- */
+.month-card.grow .lines i { animation: pzGrowX .5s cubic-bezier(.3,.7,.3,1) both; animation-delay: calc(var(--r, 0) * 35ms); transform-origin: left center; }
+@keyframes pzGrowX { from { transform: scaleX(0); } }
+
+/* ---------- Item sheet: switching Event / Deadline / All-day briefly highlights the time rows ---------- */
+.fx-flash { animation: pzFlash .9s ease-out; }
+@keyframes pzFlash { 0%, 25% { background-color: color-mix(in srgb, var(--accent) 22%, transparent); } 100% { background-color: transparent; } }
+
+@keyframes pzFade { from { opacity: 0; } }
+
+/* ---------- iPhone "Reduce Motion": simple fades instead of slides, bounces, flying squares and confetti ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .as-box, .day-panel, #screens .screen, .banner, .toast { transform: none !important; animation: none !important; opacity: 0; transition: opacity .2s ease !important; }
+  .sheet-wrap.open .sheet, .sheet-wrap.open .as-box, .day-panel.open, #screens .screen.open, .banner.show, .toast.show { opacity: 1; }
+  .habit-tick:active, .todo-check:active, .flag-btn:active { transform: none; }
+  .fx-tick, .fx-untick, .fx-check, .fx-uncheck, .h-strip i.fx-land, .perfect-card.fx-in, .progress-track i.fx-grow, .roll .new,
+  .ms-flame, .ms-title, .ms-habit, .ms-msg, .ms-badges, .ms-go, .month-card.grow .lines i {
+    animation: pzFade .25s ease-out both !important; animation-delay: 0s !important;
+  }
+  .fx-cardon { animation: pzFillIn .25s ease-out !important; }
+  .roll .old, .fx-shrink { display: none; }
+  .flame.fx-flicker, .strike.fx-strike, .perfect-card.fx-in .pc-ring svg { animation: none !important; }
+}

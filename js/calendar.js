@@ -6,6 +6,7 @@
   const VIEWS = [{ value: 'month', label: 'Month' }, { value: 'week', label: 'Week' }, { value: 'day', label: 'Day' }, { value: 'agenda', label: 'Agenda' }];
   const LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   let headEl, viewEl, view, cursor, today, panel = null, panelDate = null, agendaDays = 90, agendaMore = false;
+  let grownMonth = null;         // the month whose lines have already grown in
 
   const openItem = occ => Pz.itemSheet.open({ id: occ.item.id, key: occ.key });
   const fill = color => ({ background: color, color: Pz.textOn(color) });
@@ -26,7 +27,7 @@
   }
 
   function render(keepScroll) { renderHead(); renderView(keepScroll); }
-  function setView(v) { view = v; Pz.data.settings.calendarView = v; Pz.storage.save(); closePanel(); render(); }
+  function setView(v) { view = v; grownMonth = null; Pz.data.settings.calendarView = v; Pz.storage.save(); closePanel(); render(); }
   function goDay(date) { cursor = date; setView('day'); }
   function move(dir) {
     closePanel();
@@ -98,10 +99,12 @@
   // Month: the "open grid" – a coloured line per item, no titles, and a small count of unfinished to-dos.
   function renderMonth() {
     const first = cursor.slice(0, 8) + '01', month = first.slice(0, 7);
-    const card = h('div', { class: 'month-card' });
-    let day = D.monday(first);
+    // When a month loads, its lines grow in from the left (not when it's just redrawn after a change)
+    const card = h('div', { class: 'month-card' + (grownMonth !== month ? ' grow' : '') });
+    grownMonth = month;
+    let day = D.monday(first), r = 0;
     while (day.slice(0, 7) <= month) {
-      const row = h('div', { class: 'month-row' });
+      const row = h('div', { class: 'month-row', style: { '--r': String(r++) } });
       for (let i = 0; i < 7; i++, day = D.addDays(day, 1)) {
         const date = day, occ = I.onDay(date), left = Pz.todos.leftCount(date);
         row.appendChild(h('button', {
@@ -136,15 +139,29 @@
     if (agenda) sub = it.location; else if (it.location) sub += ' · ' + it.location;
     const mark = o.type === 'deadline'
       ? h('button', { type: 'button', class: 'flag-btn', style: { background: o.color, color: Pz.glyphOn(o.color) }, 'aria-label': o.done ? 'Mark as not done' : 'Mark as done',
-        onclick: e => { e.stopPropagation(); I.toggleDone(it, o.key); Pz.app.changed(); } }, [Pz.icon(o.done ? 'check' : 'flag', 16)])
+        onclick: e => { e.stopPropagation(); tickDeadline(it, o.key); } }, [Pz.icon(o.done ? 'check' : 'flag', 16)])
       : h('span', { class: 'bar', style: { background: o.color } });
-    const row = h('div', { class: 'item-row' + (o.done ? ' done' : ''), role: 'button', onclick: () => openItem(o) }, [
+    const row = h('div', { class: 'item-row' + (o.done ? ' done' : ''), 'data-item': it.id, 'data-occ': it.id + '|' + o.key, role: 'button', onclick: () => openItem(o) }, [
       agenda && h('span', { class: 'when' }, o.type === 'allday' ? [h('small', { text: 'All day' })] : when),
       mark,
-      h('div', { class: 'main' }, [h('div', { class: 'ttl', text: it.title }), sub && h('div', { class: 'sub', text: sub })]),
+      h('div', { class: 'main' }, [h('div', { class: 'ttl' }, [h('span', { class: 'strike', text: it.title })]), sub && h('div', { class: 'sub', text: sub })]),
       countdownChip(o)
     ]);
     return ui.swipeRow(row, () => deleteItem(it.id, o.key));
+  }
+
+  // Tick a deadline as done (or not). Finishing one is a rare moment, so it gets a little show:
+  // the line draws through it, a small burst of confetti from its flag, and the completion sound.
+  function tickDeadline(it, key) {
+    I.toggleDone(it, key);
+    Pz.app.changed();
+    if (!(it.done || []).includes(key)) return;
+    Pz.sounds.tick();
+    document.querySelectorAll('.item-row[data-occ="' + it.id + '|' + key + '"]').forEach(r => {
+      const line = r.querySelector('.strike'); if (line) line.classList.add('fx-strike');
+      const flag = r.querySelector('.flag-btn');
+      if (flag) { flag.classList.add('fx-check'); if (Pz.fx.onScreen(flag)) Pz.fx.burstFrom(flag, 36); }
+    });
   }
 
   // Delete an item. A repeating one asks "This one only / This and future ones / All" first.
@@ -158,11 +175,14 @@
         : Promise.resolve('all');
     return ask.then(scope => {
       if (!scope) { Pz.app.changed(); return false; }       // cancelled: redraw so a swiped row comes back
-      const undo = I.snapshot();
-      I.removeOccurrence(id, key, scope);
-      Pz.app.changed();
-      ui.toast('Deleted “' + it.title + '”', 'Undo', () => { undo(); Pz.app.changed(); });
-      return true;
+      const rows = Array.from(document.querySelectorAll('.item-row[data-' + (scope === 'one' ? 'occ="' + id + '|' + key : 'item="' + id) + '"]')).map(r => r.closest('.swipe-row') || r);
+      return Pz.fx.fadeAway(rows).then(() => {             // a gentle fade, then it's gone
+        const undo = I.snapshot();
+        I.removeOccurrence(id, key, scope);
+        Pz.app.changed();
+        ui.toast('Deleted “' + it.title + '”', 'Undo', () => { undo(); Pz.app.changed(); });
+        return true;
+      });
     });
   }
 
@@ -297,6 +317,10 @@
       panel = h('div', { class: 'day-panel' });
       document.getElementById('panels').appendChild(panel);
       Pz.ui.nextFrame(() => { if (panel) panel.classList.add('open'); });
+    } else if (panel.animate && !Pz.fx.reduced()) {
+      // Already open on another day: it dips a few pixels, then springs back up with the new day
+      panel.animate([{ transform: 'none' }, { transform: 'translateY(10px)', offset: 0.35 }, { transform: 'translateY(-3px)', offset: 0.75 }, { transform: 'none' }],
+        { duration: 340, easing: 'ease-in-out' });
     }
     fillPanel(); markSelected();
     panel.querySelector('.panel-list').scrollTop = 0;
@@ -327,5 +351,11 @@
     document.querySelectorAll('.now-line').forEach(n => { n.style.top = D.nowMin() / 60 * +n.closest('.tg').dataset.h + 'px'; });
   }
 
-  Pz.calendar = { init: init, refresh: refresh, tick: tick, closePanel: closePanel, panelOpen: () => !!panel, deleteItem: deleteItem, goDay: goDay, timeGrid: timeGrid };
+  // The Calendar tab has just slid into view: let the month's lines grow in again.
+  function shown() {
+    const card = viewEl && viewEl.querySelector('.month-card');
+    if (card) Pz.fx.play(card, 'grow');
+  }
+
+  Pz.calendar = { init: init, refresh: refresh, tick: tick, shown: shown, closePanel: closePanel, panelOpen: () => !!panel, deleteItem: deleteItem, goDay: goDay, timeGrid: timeGrid };
 })();

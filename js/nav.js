@@ -17,8 +17,10 @@
   const blocked = () => ui.modalOpen() || screens.length > 0 || (Pz.calendar && Pz.calendar.panelOpen());
 
   function place(animate, dx) {
-    track.style.transition = animate ? 'transform .28s cubic-bezier(.3,.7,.3,1)' : 'none';
-    track.style.transform = 'translateX(calc(' + (-index * 100) + '% + ' + (dx || 0) + 'px))';
+    const still = Pz.fx.reduced();           // iPhone "Reduce Motion": no slide, a quick fade instead
+    track.style.transition = animate && !still ? 'transform .28s cubic-bezier(.3,.7,.3,1)' : 'none';
+    track.style.transform = 'translateX(calc(' + (-index * 100) + '% + ' + (still ? 0 : dx || 0) + 'px))';
+    if (animate && still && track.animate) track.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' });
     Array.from(bar.children).forEach((b, i) => b.classList.toggle('on', i === index));
   }
 
@@ -26,8 +28,10 @@
     const i = tabs.findIndex(t => t.id === id);
     if (i < 0) return;
     if (Pz.calendar && id !== 'calendar') Pz.calendar.closePanel();
+    const arriving = i !== index;
     index = i;
     place(animate !== false);
+    if (arriving && id === 'calendar' && Pz.calendar) Pz.calendar.shown();     // month lines grow in again
   }
 
   function init() {

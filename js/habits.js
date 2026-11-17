@@ -90,7 +90,7 @@
   H.dayProgress = date => {
     const daily = H.active(date).filter(h => !H.isWeekly(h));
     const done = daily.filter(h => H.isDone(h, date));
-    return { total: daily.length, done: done.length, colors: done.map(h => h.color), pct: daily.length ? Math.round(done.length / daily.length * 100) : 0 };
+    return { total: daily.length, done: done.length, colors: done.map(h => h.color), doneHabits: done, pct: daily.length ? Math.round(done.length / daily.length * 100) : 0 };
   };
 
   // ---- The graph: % of all habits completed on one day ----

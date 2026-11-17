@@ -99,7 +99,4 @@ svg { display: block; flex: none; }
   background: var(--bg);
 }
 
-/* iPhone "Reduce Motion": no sliding or bouncing (full version comes in step 5) */
-@media (prefers-reduced-motion: reduce) {
-  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
-}
+/* iPhone "Reduce Motion": handled in css/motion.css (simple fades instead of slides and bounces) */

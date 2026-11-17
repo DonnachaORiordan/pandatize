@@ -53,6 +53,7 @@
     code: '<path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5"/>',
     flame: '<path d="M12 3c.5 3 4.5 5 4.5 10a4.5 4.5 0 01-9 0c0-1.8.8-3 1.8-4 .2 1.5 1 2.3 1.7 2.5C11 9.5 10.5 6 12 3z" fill="currentColor"/>',
     graph: '<path d="M4 19.5h16M5 15l4-4.5 3.5 3L19 6.5"/>',
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/>',
     // Small extras
     dots: '<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
     tack: '<path d="M9 3.5h6l-1 6 3 3.5H7l3-3.5zM12 13v7.5"/>',
