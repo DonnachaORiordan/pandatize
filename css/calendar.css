@@ -140,3 +140,6 @@
 .delete-btn { width: 100%; min-height: 50px; border-radius: 16px; background: var(--field); color: var(--red); font-weight: 600; text-align: center; margin-top: 24px; }
 .tg.compact .ev.short { display: block; }
 .tg.compact .ev.short b { white-space: nowrap; text-overflow: clip; }
+
+/* The calendar slides between months/weeks/days inside its own tab, never over Habits or Lists */
+.tab-page[data-tab="calendar"] { overflow: hidden; }

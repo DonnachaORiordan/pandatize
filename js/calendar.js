@@ -52,26 +52,35 @@
         if (row) return dx > 0 && !row.pzIsOpen();
         return true;
       },
-      move: dx => { if (!Pz.fx.reduced()) slide(dx, 0); },         // the calendar follows the finger
+      move: dx => { if (!Pz.fx.reduced()) slide(dx * 0.5, 0); },   // the calendar follows the finger (with a little resistance)
       end: (dx, speed) => {
         const dir = dx < -60 || (dx < -20 && speed < -0.4) ? 1 : dx > 60 || (dx > 20 && speed > 0.4) ? -1 : 0;
         if (!dir) { slide(0, 200); return; }                         // not far enough: spring back
         if (Pz.fx.reduced()) {                                       // Reduce Motion: a quick fade instead of sliding
-          move(dir);
+          slide(0, 0); move(dir);
           if (viewEl.animate) viewEl.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' });
           return;
         }
-        // Slide off to one side, change month/week/day, then slide the new one in from the other side
+        // Like turning a page: a picture of the old month/week/day slides out while the new one
+        // slides in right behind it, at the same time, so there's never a blank moment.
         busy = true;
-        const w = viewEl.offsetWidth;
-        slide(-dir * w, 150);
-        setTimeout(() => {
-          move(dir);
-          slide(dir * w, 0);
-          void viewEl.offsetWidth;                                   // (makes the browser place it before sliding back in)
-          slide(0, 240);
-          setTimeout(() => { viewEl.style.transition = ''; busy = false; }, 260);
-        }, 150);
+        const w = viewEl.offsetWidth, from = dx * 0.5;
+        const old = viewEl.cloneNode(true);
+        Object.assign(old.style, { position: 'absolute', top: viewEl.offsetTop + 'px', left: viewEl.offsetLeft + 'px', width: w + 'px',
+          height: viewEl.offsetHeight + 'px', margin: '0', pointerEvents: 'none', transition: 'none', transform: 'translateX(' + from + 'px)' });
+        old.querySelectorAll('.grow').forEach(el => el.classList.remove('grow'));      // the picture doesn't replay the lines growing in
+        page.appendChild(old);
+        // Keep the picture scrolled exactly where the real one was
+        old.scrollTop = viewEl.scrollTop;
+        const realScrollers = viewEl.querySelectorAll('.tg-scroll, .card'), copyScrollers = old.querySelectorAll('.tg-scroll, .card');
+        realScrollers.forEach((el, i) => { if (copyScrollers[i]) copyScrollers[i].scrollTop = el.scrollTop; });
+        move(dir);                                                   // the real calendar now shows the new period…
+        slide(dir * w + from, 0);                                    // …waiting just off-screen on the other side
+        void viewEl.offsetWidth;                                     // (makes the browser place both before they move)
+        const ease = 'transform 260ms cubic-bezier(.3,.7,.3,1)';
+        old.style.transition = ease; old.style.transform = 'translateX(' + (-dir * w) + 'px)';
+        slide(0, 260);
+        setTimeout(() => { old.remove(); viewEl.style.transition = ''; busy = false; }, 280);
       }
     });
   }

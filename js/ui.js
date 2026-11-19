@@ -44,6 +44,20 @@
   ui.backLink = (label, onClick) =>
     h('button', { type: 'button', class: 'back-link', onclick: onClick }, [Pz.icon('chevL', 20), h('span', { text: label })]);
 
+  // A finger that moved more than 10px between touching and lifting was a swipe or a scroll, never a tap.
+  // (Fix, 19 Nov 2026: after a swipe from Habits to Today, the iPhone sometimes delivered the finger-lift
+  // as a late "tap" on Today's "Open day" link, which jumped to the Calendar.)
+  // Only movement while pressed counts, and only for the tap straight after lifting.
+  (function () {
+    let downX = 0, downY = 0, down = false, moved = false, upAt = 0;
+    document.addEventListener('pointerdown', e => { downX = e.clientX; downY = e.clientY; down = true; moved = false; }, true);
+    document.addEventListener('pointermove', e => { if (down && (Math.abs(e.clientX - downX) > 10 || Math.abs(e.clientY - downY) > 10)) moved = true; }, true);
+    const up = () => { down = false; upAt = performance.now(); };
+    document.addEventListener('pointerup', up, true);
+    document.addEventListener('pointercancel', up, true);
+    document.addEventListener('click', e => { if (moved && e.isTrusted && performance.now() - upAt < 1500) { e.stopPropagation(); e.preventDefault(); } }, true);
+  })();
+
   // Bigger hit areas (DESIGN.md section 10): a tap anywhere in one zone of a card or row counts as
   // a tap on its tick box. side = 'right' (the right third, for habit cards) or 'left' (the first 56px,
   // for to-do rows). Taps on other buttons inside (chips, the pin…) still do their own thing.
