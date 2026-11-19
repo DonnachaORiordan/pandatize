@@ -2,7 +2,7 @@
    the add/edit habit sheet, and the Progress graph screen. */
 
 :root { --tint: 30%; --miss: #000000; }                       /* a done card gets 30% of its colour (dark mode) */
-@media (prefers-color-scheme: light) { :root { --tint: 16%; --miss: #FFFFFF; } }     /* …and 16% mixed into white (light mode) */
+:root[data-theme="light"] { --tint: 16%; --miss: #FFFFFF; }     /* …and 16% mixed into white (light mode) */
 
 /* ---------- Shared habit pieces ---------- */
 .habit-ic { border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; flex: none; }
@@ -83,7 +83,7 @@
 .big-sub { font-size: 14px; color: var(--text2); margin-top: 4px; }
 .compare { font-size: 14px; font-weight: 600; color: #30D158; margin-top: 6px; }
 .compare.down { color: var(--red); }
-@media (prefers-color-scheme: light) { .compare { color: #1E8E3E; } }
+[data-theme="light"] .compare { color: #1E8E3E; }
 .chart { margin-top: 18px; }
 .chart-main { display: flex; height: 150px; }
 .y-axis { position: relative; width: 38px; flex: none; }
@@ -114,9 +114,7 @@
 .sheet .h-strip i:not(.done):not(.missed):not(.today), .sheet .pips i:not(.on) { background: var(--pill); }
 
 /* Light mode: a missed day is a white square with a soft outline, so it still shows on a colour-filled card */
-@media (prefers-color-scheme: light) {
-  .h-strip i.missed { background: #FFFFFF; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--hc) 45%, #FFFFFF); }
-}
+[data-theme="light"] .h-strip i.missed { background: #FFFFFF; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--hc) 45%, #FFFFFF); }
 
 /* Year graph: month names at a slant so all twelve fit (each one ends under its place on the graph) */
 .x-axis.slant { height: 38px; }
@@ -124,10 +122,11 @@
 
 /* Light mode: the grey "nothing to do that day" squares (days before the habit existed, or a weekly
    habit's days off) darken whatever is behind them, so they show on a white card AND on a colour-filled one */
-@media (prefers-color-scheme: light) {
-  .h-strip i, .h-strip i.neutral { background: rgba(0, 0, 0, 0.14); opacity: 1; }
-  .h-strip i.done { background: var(--hc); }
-  .h-strip i.today { background: none; }
-  .h-strip i.missed { background: #FFFFFF; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--hc) 60%, #FFFFFF); }
-  .sheet .h-strip i:not(.done):not(.missed):not(.today) { background: rgba(0, 0, 0, 0.14); }
-}
+[data-theme="light"] .h-strip i, [data-theme="light"] .h-strip i.neutral { background: rgba(0, 0, 0, 0.14); opacity: 1; }
+[data-theme="light"] .h-strip i.done { background: var(--hc); }
+[data-theme="light"] .h-strip i.today { background: none; }
+[data-theme="light"] .h-strip i.missed { background: #FFFFFF; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--hc) 60%, #FFFFFF); }
+[data-theme="light"] .sheet .h-strip i:not(.done):not(.missed):not(.today) { background: rgba(0, 0, 0, 0.14); }
+
+/* The habit description box sits just under the name in the habit sheet */
+.habit-desc { min-height: 72px; margin: -6px 0 4px; }

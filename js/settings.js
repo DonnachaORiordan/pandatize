@@ -16,6 +16,10 @@
       box.innerHTML = '';
       box.appendChild(h('div', { class: 'group' }, [row('tag', 'Categories', chev(), Pz.categories.openScreen)]));
       box.appendChild(h('div', { class: 'group' }, [
+        // Appearance: Auto = whatever the phone is set to; or always Light / always Dark
+        row('appearance', 'Appearance', h('span', { class: 'theme-seg' }, [ui.segmented(
+          [{ value: 'auto', label: 'Auto' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }],
+          Pz.data.settings.theme || 'auto', v => { Pz.data.settings.theme = v; Pz.storage.save(); Pz.app.applyTheme(); })])),
         row('speaker', 'Sounds', ui.toggle(Pz.data.settings.sounds, on => {
           Pz.data.settings.sounds = on; Pz.storage.save();
           if (on) Pz.sounds.tick();                      // a little sample so you hear it's on

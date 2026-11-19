@@ -48,7 +48,7 @@
       app: 'pandatize',
       dataVersion: cfg.dataVersion,
 
-      // Habits. Each: { id, title, color, icon, freq: { type: 'daily' | 'weekly', times: 3 },
+      // Habits. Each: { id, title, description (a note to yourself; dataVersion 3), color, icon, freq: { type: 'daily' | 'weekly', times: 3 },
       //   created: 'YYYY-MM-DD', archived: false, done: ['YYYY-MM-DD', …], best: 12 (longest streak remembered) }
       //   – the list order is the display order
       habits: [],
@@ -81,13 +81,15 @@
 
       // Lists. Each list: { id, name, color, icon, entries: [ … ] }. Each entry:
       // { id, kind: 'todo' | 'note', title, body, done, doneAt, due, dueTime,
+      //   start (to-dos: null, or the day it starts showing on the daily to-do list every day until ticked; dataVersion 3),
       //   priority: null | 'low' | 'medium' | 'high', subtasks: [{ id, title, done }], pinned, created, updated }
       lists: startingLists(),
 
       // Reminders (step 2): which ones have been dismissed or already shown as a banner
       reminders: { dismissed: {}, shown: {} },
 
-      settings: { sounds: true, calendarView: 'month', lastExport: null }
+      // theme: 'auto' (follow the phone) | 'light' | 'dark'  (dataVersion 3)
+      settings: { sounds: true, calendarView: 'month', lastExport: null, theme: 'auto' }
     };
   }
 
@@ -96,7 +98,14 @@
   const converters = {
     // Version 1 → 2: for a short while lists could be pinned; that was removed again.
     // Nothing needs converting (the leftover "pinned" on a list is cleared in upgrade() below).
-    1: data => { data.dataVersion = 2; return data; }
+    1: data => { data.dataVersion = 2; return data; },
+    // Version 2 → 3 (19 Nov 2026): habits get a description, list to-dos a start date, settings an Appearance choice.
+    2: data => {
+      (data.habits || []).forEach(x => { if (x && typeof x.description !== 'string') x.description = ''; });
+      (data.lists || []).forEach(l => ((l && l.entries) || []).forEach(e => { if (e && e.start === undefined) e.start = null; }));
+      if (data.settings && !data.settings.theme) data.settings.theme = 'auto';
+      data.dataVersion = 3; return data;
+    }
   };
 
   function upgrade(data) {

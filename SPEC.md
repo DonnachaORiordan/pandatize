@@ -8,7 +8,7 @@ Pandatize is my habit tracker + calendar + to-do lists/notes app for my iPhone (
 - Plain HTML, CSS and JavaScript. No frameworks, no build tools, no Node.js. Must work by double-clicking index.html on my laptop (except the offline/home-screen features, which only work on the live site).
 - The app name is written in ONE place: js/config.js.
 - All saving and loading code is in ONE file: js/storage.js (so online syncing could be added one day).
-- Data is saved on the device with a `dataVersion` number (started at 1; now 2). Design the data shape in step 1 for the WHOLE app (habits, categories, calendar items, to-dos, lists, settings), so later steps don't need a data conversion. If the format ever has to change, raise dataVersion and write a converter. Use localStorage unless the data could outgrow it; if so use IndexedDB, still only inside storage.js.
+- Data is saved on the device with a `dataVersion` number (started at 1; now 3). Design the data shape in step 1 for the WHOLE app (habits, categories, calendar items, to-dos, lists, settings), so later steps don't need a data conversion. If the format ever has to change, raise dataVersion and write a converter. Use localStorage unless the data could outgrow it; if so use IndexedDB, still only inside storage.js.
 - Progressive web app: manifest.json, home-screen icons made from logo.png, and a service worker so it works offline. The service worker has a version number that must go up every time any app file changes.
 - Hosting: GitHub Pages from a PUBLIC GitHub repo called `pandatize` (live at https://donnachaoriordan.github.io/pandatize/). Never put personal data, backups, passwords or keys in the repo.
 - Any outside library, sound or image: tell me its name, source and licence first and wait for my OK. Relaxed licences only (MIT, BSD, CC0, CC-BY with credit). List everything in CREDITS.md. Prefer drawing things ourselves (SVG) and making simple sounds in code.
@@ -21,7 +21,7 @@ Pandatize is my habit tracker + calendar + to-do lists/notes app for my iPhone (
 - Until a tab is built, it shows a simple, nicely styled "Coming soon" screen.
 
 ## 3. Habits
-- A habit has: title, colour (palette or custom), icon, frequency (**every day** OR **X times per week**, X from 1 to 7), date created, archived yes/no, and its tick history (the dates it was done).
+- A habit has: title, description (optional, a note to remind myself, shown under the name in the habit sheet), colour (palette or custom), icon, frequency (**every day** OR **X times per week**, X from 1 to 7), date created, archived yes/no, and its tick history (the dates it was done).
 - **Ticking:** tap the tick box to mark done; tap again to un-tick. I can tick for today, any past day, or a future day, by picking the day in the week strip on Habits (‹ › arrows or swiping the strip goes to other weeks). Tiles on the Today screen always tick for today.
 - Days before a habit was created never count as missed.
 - **Daily streak:** days in a row it was done, counting back from today if done today, otherwise from yesterday (not ticking today yet doesn't break the streak until the day is over).
@@ -126,7 +126,7 @@ All views share the header (DESIGN.md section 7): ‹ title › arrows, search, 
 ## 8. Lists
 - **Lists screen:** all my lists (as many as I want), each with a name, colour and icon, showing counts ("9 to-dos · 4 notes") and "3 due this week" in orange if any. + adds a list. "Search all lists" searches every list. A "Recently edited" section shows the last 3 items edited. Start with four lists: College, Shopping, Ideas, General notes. Press and hold to reorder; a list's ⋯ menu has Rename/Edit and Delete (asks first).
 - **Inside a list:** notes and to-dos mixed together.
-  - **To-do:** checkbox, title, optional due date and time, optional priority flag (low = yellow, medium = orange, high = red), optional subtasks (each with its own checkbox; shows "1 of 3 subtasks"), optional notes.
+  - **To-do:** checkbox, title, optional start date (from that day on it shows on the daily to-do list every day until ticked), optional due date and time, optional priority flag (low = yellow, medium = orange, high = red), optional subtasks (each with its own checkbox; shows "1 of 3 subtasks"), optional notes.
   - **Note:** a title and body text.
   - **Pinned** items stay at the top under "Pinned". Then "Everything else". Then "Completed · N": completed to-dos stay visible with a line through them (un-tick to bring back).
   - Search within the list. Press and hold to reorder. Swipe left to delete (fades out). Tap an item to open and edit it in a sheet (with Pin, Delete).
@@ -134,7 +134,7 @@ All views share the header (DESIGN.md section 7): ‹ title › arrows, search, 
 - A list to-do with a due date also appears in that day's to-do list (Today / Day view), tagged with its list's name and colour; ticking it in either place ticks it in both. If it's overdue and not done, it carries over like other to-dos.
 
 ## 9. Settings (from the gear)
-iOS-style grouped rows: **Categories** (section 4; laid out as in DESIGN.md), Sounds on/off, Archived habits (Unarchive, Delete), Export backup, Import backup, app version number.
+iOS-style grouped rows: **Categories** (section 4; laid out as in DESIGN.md), Appearance (Auto = follow the phone, Light, Dark), Sounds on/off, Archived habits (Unarchive, Delete), Export backup, Import backup, app version number.
 
 ## 10. Sounds and backup
 - Sounds: a short soft completion sound for ticks (habits and to-dos), a brighter one for a perfect day, a gentle chime for milestones. Made in code (Web Audio) unless I ask for sound files. On/off saved in Settings.
@@ -256,3 +256,12 @@ Small things the plan didn't spell out, chosen to fit sections 1–11 and DESIGN
 - **Month lines** grow in when a month is shown: on changing month, switching to Month view, or arriving on the Calendar tab. Not when the month is just redrawn after a change.
 - **Panels:** sheets, action sheets and the day panel spring up with a small overshoot. Tapping another day while the day panel is open makes it dip a few pixels and spring back (the "anticipation" from DESIGN.md 10).
 - **Reduce Motion on:** tabs fade instead of sliding; sheets, panels and screens fade in; ticks, cards and squares fade instead of popping; no flying square, no confetti, no rolling numbers, no flicker; the strike line appears without drawing.
+
+**Changes before step 6 (my requests, 19 Nov)**
+- **Appearance** in Settings: Auto (follows the phone's dark/light setting, and switches straight away when the phone does), Light or Dark. Saved as `settings.theme` ('auto' | 'light' | 'dark'). The app labels the page `data-theme="light"` or `"dark"` and the CSS picks its colours from that label (no more "follow the phone" rules in the CSS itself). The iPhone's top-bar colour follows too.
+- **Gear icon** changed to a toothed cog.
+- **Habit icons:** 10 more, so 22 in all: piano (piano keys), guitar, shower (cold shower), language, wakeup (get up), wsj, brain (a head in profile with a brain inside), cooking (frying pan), phone (phone screen), apple (healthy food). "Stretch" was already one of the original 12.
+- **Habit description:** an optional box right under the name in the habit sheet. Only shown in the sheet (tap the habit card to see it), not on the cards.
+- **Pin** (quick pin on list cards) is drawn tilted at about 40°.
+- **List to-do start date:** a "Starts" row above "Due". From its start date the to-do shows on that day's to-do list, and then on Today every day until ticked (tagged with its list, "due Tue 24 Nov" if the due date is still ahead, and "Carried over from Tue" after the first day). On future days in the calendar it shows on its start day and its due day. Once ticked it stays on the day it was ticked. Before the start day the list card says "Starts Fri 20 Nov". (Day to-dos already work this way: Edit to-do › Day sets the day it starts, and it carries over until ticked.)
+- **dataVersion 3:** the converter adds an empty description to habits, `start: null` to list entries and `theme: 'auto'` to settings.

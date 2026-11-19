@@ -4,8 +4,25 @@
   const listeners = [];
   let lastDay = null;
 
+  // ---- Appearance: Auto (follow the phone), Light or Dark (Settings › Appearance) ----
+  // The page gets a label, data-theme="light" or "dark", and css/theme.css picks the colours from it.
+  const phoneDark = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
+  function applyTheme() {
+    const pick = (Pz.data && Pz.data.settings.theme) || 'auto';
+    const mode = pick === 'auto' ? (phoneDark && !phoneDark.matches ? 'light' : 'dark') : pick;
+    document.documentElement.setAttribute('data-theme', mode);
+    // The colour of the iPhone's top bar follows too
+    Array.from(document.querySelectorAll('meta[name="theme-color"]')).forEach(m => m.setAttribute('content', mode === 'light' ? '#E2EBFA' : '#000000'));
+  }
+  // When set to Auto and the phone switches between dark and light, follow it straight away
+  if (phoneDark) {
+    const follow = () => applyTheme();
+    if (phoneDark.addEventListener) phoneDark.addEventListener('change', follow); else if (phoneDark.addListener) phoneDark.addListener(follow);
+  }
+
   // Called whenever saved data changes, so every screen showing it redraws.
   function changed() {
+    applyTheme();                     // (an imported backup may bring a different Appearance setting)
     Pz.todos.maintain();              // carry-over and auto-tasks first, so the screens draw the result
     Pz.calendar.refresh();
     Pz.today.refresh();
@@ -33,6 +50,7 @@
   function start() {
     document.title = Pz.config.appName;
     Pz.storage.load();
+    applyTheme();
     lastDay = Pz.dates.today();
     Pz.todos.maintain();
     Pz.habits.rememberBests();
@@ -63,6 +81,6 @@
     });
   }
 
-  Pz.app = { changed: changed, listen: listen };
+  Pz.app = { changed: changed, listen: listen, applyTheme: applyTheme };
   start();
 })();

@@ -72,3 +72,6 @@
 .filter-card { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; }
 .filter-card .sub { display: flex; align-items: center; gap: 5px; }
 .filter-card .sub span { overflow: hidden; text-overflow: ellipsis; }
+
+/* Settings › Appearance: the Auto / Light / Dark switch sits at the end of its row */
+.theme-seg { flex: none; width: 186px; }

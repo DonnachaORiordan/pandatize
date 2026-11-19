@@ -34,31 +34,31 @@
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Inter, 'Helvetica Neue', system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color-scheme: light;
-    --bg: linear-gradient(180deg, #E2EBFA 0%, #F1F5FC 45%, #FFFFFF 100%);
-    --page: #D9E2F2;
-    --card: #FFFFFF;
-    --card2: #E8E8EE;
-    --seg: #FFFFFF;
-    --text: #111114;
-    --on-text: #FFFFFF;
-    --text2: #5C5C66;
-    --check: #8E8E96;
-    --hair: rgba(0,0,0,0.07);
-    --accent: #0062D1;
-    --red: #C4000F;
-    --red-bg: #FDE3E1;
-    --orange: #A04F00;
-    --orange-bg: #FFEFD9;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06);
-    --sheet: #F2F2F7;
-    --field: #FFFFFF;
-    --pill: #E8E8EE;
-    --dim: rgba(0,0,0,0.35);
-    --float: rgba(255,255,255,0.88);
-  }
+/* Light mode. The app labels the page data-theme="light" or "dark" (js/app.js), from Settings › Appearance:
+   "Auto" follows the phone, or Light / Dark can be picked by hand. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: linear-gradient(180deg, #E2EBFA 0%, #F1F5FC 45%, #FFFFFF 100%);
+  --page: #D9E2F2;
+  --card: #FFFFFF;
+  --card2: #E8E8EE;
+  --seg: #FFFFFF;
+  --text: #111114;
+  --on-text: #FFFFFF;
+  --text2: #5C5C66;
+  --check: #8E8E96;
+  --hair: rgba(0,0,0,0.07);
+  --accent: #0062D1;
+  --red: #C4000F;
+  --red-bg: #FDE3E1;
+  --orange: #A04F00;
+  --orange-bg: #FFEFD9;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --sheet: #F2F2F7;
+  --field: #FFFFFF;
+  --pill: #E8E8EE;
+  --dim: rgba(0,0,0,0.35);
+  --float: rgba(255,255,255,0.88);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }

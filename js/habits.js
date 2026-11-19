@@ -110,12 +110,12 @@
   // ---- Adding ----
   H.blank = () => {
     const used = H.shown().map(h => h.color);
-    return { id: null, title: '', color: (Pz.config.palette.find(p => !used.includes(p.hex)) || Pz.config.palette[7]).hex, icon: 'book', freq: { type: 'daily', times: 3 } };
+    return { id: null, title: '', description: '', color: (Pz.config.palette.find(p => !used.includes(p.hex)) || Pz.config.palette[7]).hex, icon: 'book', freq: { type: 'daily', times: 3 } };
   };
   H.save = d => {
     const old = d.id ? H.get(d.id) : null;
-    if (old) Object.assign(old, { title: d.title.trim(), color: d.color, icon: d.icon, freq: d.freq });
-    else Pz.data.habits.push({ id: 'habit-' + Pz.storage.uid(), title: d.title.trim(), color: d.color, icon: d.icon, freq: d.freq, created: D.today(), archived: false, done: [], best: 0 });
+    if (old) Object.assign(old, { title: d.title.trim(), description: (d.description || '').trim(), color: d.color, icon: d.icon, freq: d.freq });
+    else Pz.data.habits.push({ id: 'habit-' + Pz.storage.uid(), title: d.title.trim(), description: (d.description || '').trim(), color: d.color, icon: d.icon, freq: d.freq, created: D.today(), archived: false, done: [], best: 0 });
     Pz.storage.save();
   };
   // The 5 example habits (DESIGN.md section 4)

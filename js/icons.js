@@ -7,7 +7,7 @@
     habits: '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16 9.5"/>',
     calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
     lists: '<path d="M9 6.5h11M9 12h11M9 17.5h11M4 6.5h.01M4 12h.01M4 17.5h.01"/>',
-    gear: '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.8"/><path d="M12 2.5v2.7M12 18.8v2.7M2.5 12h2.7M18.8 12h2.7M5.3 5.3l1.9 1.9M16.8 16.8l1.9 1.9M5.3 18.7l1.9-1.9M16.8 7.2l1.9-1.9"/>',
+    gear: '<path d="M10.54 4.85L10.64 2.3h2.72l.1 2.55 2.57 1.06 1.87-1.74 1.93 1.93-1.74 1.87 1.06 2.57 2.55.1v2.72l-2.55.1-1.06 2.57 1.74 1.87-1.93 1.93-1.87-1.74-2.57 1.06-.1 2.55h-2.72l-.1-2.55-2.57-1.06-1.87 1.74-1.93-1.93 1.74-1.87-1.06-2.57-2.55-.1v-2.72l2.55-.1 1.06-2.57-1.74-1.87 1.93-1.93 1.87 1.74z"/><circle cx="12" cy="12" r="3"/>',
     chevL: '<path d="M14.5 5.5L8 12l6.5 6.5"/>',
     chevR: '<path d="M9.5 5.5L16 12l-6.5 6.5"/>',
     up: '<path d="M6 14.5l6-6 6 6"/>',
@@ -51,13 +51,25 @@
     leaf: '<path d="M5 19c0-9 5-14 14.5-14.5C19 14 14 19 5 19zM5 19l7-7"/>',
     coffee: '<path d="M5 9.5h11v5a5 5 0 01-5 5h-1a5 5 0 01-5-5zM16 10.5h1.5a2.5 2.5 0 010 5H16M8 3.5v2.5M12 3.5v2.5"/>',
     code: '<path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5"/>',
+    // More habit icons (added 19 Nov 2026)
+    piano: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 13v6M12 13v6M16 13v6"/><path d="M6.5 5v8h3V5M14.5 5v8h3V5" fill="currentColor"/>',      // piano keys
+    guitar: '<g transform="rotate(40 12 12)"><path d="M12 8.5a3 3 0 00-3 3c0 .8.3 1.4.7 2a4.5 4.5 0 104.6 0c.4-.6.7-1.2.7-2a3 3 0 00-3-3zM12 8.5V2M10.5 2.5h3"/><circle cx="12" cy="16.6" r="1.4"/></g>',
+    shower: '<path d="M5 20.5V6a3 3 0 016 0M7.5 10h7a3.5 3.5 0 00-7 0zM8.5 13.5l-.5 1.5M11 13.5V15M13.5 13.5l.5 1.5M8 17.5L7.5 19M11 17.5V19M14 17.5l.5 1.5M19 3v6M16.4 4.5l5.2 3M16.4 7.5l5.2-3"/>',
+    language: '<path d="M4 4.5h9a1 1 0 011 1v6a1 1 0 01-1 1H8.5L5 15v-2.5H4a1 1 0 01-1-1v-6a1 1 0 011-1zM6.5 11l2-5 2 5M7.3 9.2h2.4M16 9.5h4a1 1 0 011 1v6a1 1 0 01-1 1h-1V20l-3-2.5h-4a1 1 0 01-1-1V14M14.5 13h4M14.5 15.3h2.5"/>',
+    wakeup: '<path d="M3 18.5h18M7 18.5a5 5 0 0110 0M12 3v6.5M9.5 5.5L12 3l2.5 2.5M4.5 13.5l1.5 1M19.5 13.5l-1.5 1M7 21.5h10"/>',
+    wsj: '<text x="12" y="15.4" text-anchor="middle" font-size="9.5" font-weight="800" letter-spacing="-.2" font-family="Georgia, \'Times New Roman\', serif" fill="currentColor" stroke="none">WSJ</text>',
+    brain: '<path d="M9.5 21v-3H7.5a2 2 0 01-2-2v-2.5l-2-.8 2-3.2A7 7 0 0112.5 3a7 7 0 017 7c0 2.6-1 4.3-2.5 5.5V21"/><path d="M10 8.5a2 2 0 013.3-.8 2 2 0 013.2 1.8 1.8 1.8 0 01-2 2.5H11a1.8 1.8 0 01-1-3.5z"/>',      // a brain inside a head seen from the side (option 8 of 20)
+    cooking: '<path d="M2.5 12h13v1a3.5 3.5 0 01-3.5 3.5H6A3.5 3.5 0 012.5 13zM15.5 13h6M6.5 4.5c-.8 1 .8 2 0 3M9.5 3.5c-.8 1 .8 2 0 3M12.5 4.5c-.8 1 .8 2 0 3"/>',      // frying pan with steam
+    phone: '<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 5h3M11.5 18.5h1"/>',
+    apple: '<path d="M12 8c-1.5-1-5.5-1.5-6.8 2.2-1.3 3.7.8 9.8 4.3 10.3.9.1 1.6-.5 2.5-.5s1.6.6 2.5.5c3.5-.5 5.6-6.6 4.3-10.3C17.5 6.5 13.5 7 12 8zM12 8V5.5M12.5 5.5c.3-1.6 1.8-2.6 3.8-2.6-.3 1.8-1.8 2.8-3.8 2.6z"/>',
+    appearance: '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 010 17z" fill="currentColor"/>',
     flame: '<path d="M12 3c.5 3 4.5 5 4.5 10a4.5 4.5 0 01-9 0c0-1.8.8-3 1.8-4 .2 1.5 1 2.3 1.7 2.5C11 9.5 10.5 6 12 3z" fill="currentColor"/>',
     graph: '<path d="M4 19.5h16M5 15l4-4.5 3.5 3L19 6.5"/>',
     lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/>',
     // Small extras
     dots: '<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
-    tack: '<path d="M9 3.5h6l-1 6 3 3.5H7l3-3.5zM12 13v7.5"/>',
-    tackFill: '<path d="M9 3.5h6l-1 6 3 3.5H7l3-3.5z" fill="currentColor"/><path d="M12 13v7.5"/>',
+    tack: '<g transform="rotate(40 12 12)"><path d="M9 3.5h6l-1 6 3 3.5H7l3-3.5zM12 13v7.5"/></g>',
+    tackFill: '<g transform="rotate(40 12 12)"><path d="M9 3.5h6l-1 6 3 3.5H7l3-3.5z" fill="currentColor"/><path d="M12 13v7.5"/></g>',
     flagFill: '<path d="M6 4.5h11l-2.2 4 2.2 4H6z" fill="currentColor"/><path d="M6 21V4"/>'
   };
 

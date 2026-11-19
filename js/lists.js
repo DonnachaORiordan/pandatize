@@ -177,6 +177,7 @@
     let inner;
     if (e.kind === 'todo') {
       const subs = e.subtasks || [], meta = [];
+      if (e.start && e.start > today && !e.done) meta.push('Starts ' + D.short(e.start));       // (once started it's on the daily to-do list)
       if (e.due) meta.push(dueText(e));
       if (subs.length) meta.push(subs.filter(s => s.done).length + ' of ' + plural(subs.length, 'subtask', 'subtasks'));
       inner = [
@@ -240,7 +241,7 @@
 
   // ---------- The sheet for one to-do or note ----------
   function openEntry(l, entry, kind) {
-    const d = entry ? clone(entry) : { id: null, kind: kind, title: '', body: '', done: false, doneAt: null, due: null, dueTime: null, priority: null, subtasks: [], pinned: false };
+    const d = entry ? clone(entry) : { id: null, kind: kind, title: '', body: '', done: false, doneAt: null, start: null, due: null, dueTime: null, priority: null, subtasks: [], pinned: false };
     const todo = d.kind === 'todo';
     const label = t => h('div', { class: 'section-label', text: t });
     const titleInput = h('input', { type: 'text', class: 'title-field', placeholder: todo ? 'To-do' : 'Title', value: d.title, 'aria-label': 'Title', enterkeyhint: 'done',
@@ -252,6 +253,9 @@
     if (todo) {
       const pill = Pz.itemSheet.pill;
       parts.push(h('div', { class: 'group' }, [
+        // Starts: from this day on, it shows on the daily to-do list (Today) every day until it's ticked
+        ui.row('Starts', h('span', { class: 'pills' }, [
+          pill('date', d.start, v => { d.start = v || null; }, { empty: 'No date', label: 'Start date' }).el])),
         ui.row('Due', h('span', { class: 'pills' }, [
           pill('date', d.due, v => { d.due = v || null; }, { empty: 'No date', label: 'Due date' }).el,
           pill('time', d.dueTime, v => { d.dueTime = v || null; }, { empty: 'Time', label: 'Due time' }).el])),
@@ -271,6 +275,7 @@
         if (focusLast) { const inputs = subBox.querySelectorAll('input'); inputs[inputs.length - 1].focus(); }
       };
       drawSubs();
+      parts.splice(2, 0, h('p', { class: 'footnote', text: 'From its start date it shows on Today every day until you tick it.' }));
       parts.push(label('Subtasks'), subBox, label('Notes'), text);
     } else parts.push(text);
 

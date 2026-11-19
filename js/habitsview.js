@@ -5,7 +5,8 @@
 (function () {
   const D = Pz.dates, ui = Pz.ui, h = ui.h, H = Pz.habits;
   const V = {};
-  const ICONS = ['book', 'dumbbell', 'pawn', 'moon', 'stretch', 'drop', 'pen', 'music', 'leaf', 'heart', 'coffee', 'code'];
+  const ICONS = ['book', 'dumbbell', 'pawn', 'moon', 'stretch', 'drop', 'pen', 'music', 'leaf', 'heart', 'coffee', 'code',
+    'piano', 'guitar', 'shower', 'language', 'wakeup', 'wsj', 'brain', 'cooking', 'phone', 'apple'];
   const LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   let page = null, body = null, sel = null;         // sel = the day being ticked for (today unless another is picked)
 
@@ -172,7 +173,7 @@
 
   // ---- Add / edit habit sheet ----
   function openSheet(hb) {
-    const d = hb ? { id: hb.id, title: hb.title, color: hb.color, icon: hb.icon, freq: { type: hb.freq.type, times: hb.freq.times } } : H.blank();
+    const d = hb ? { id: hb.id, title: hb.title, description: hb.description || '', color: hb.color, icon: hb.icon, freq: { type: hb.freq.type, times: hb.freq.times } } : H.blank();
     const preview = h('div'), colours = h('div', { class: 'swatches seven' }), icons = h('div', { class: 'icon-grid' }), freqBox = h('div', { class: 'group' });
     const label = t => h('div', { class: 'section-label', text: t });
     const inPalette = () => Pz.config.palette.some(p => p.hex.toLowerCase() === d.color.toLowerCase());
@@ -206,7 +207,10 @@
 
     const input = h('input', { type: 'text', class: 'title-field', placeholder: 'Habit name', value: d.title, 'aria-label': 'Habit name', enterkeyhint: 'done',
       oninput: e => { d.title = e.target.value; drawPreview(); }, onkeydown: e => { if (e.key === 'Enter') e.target.blur(); } });
-    const parts = [preview, input, label('Colour'), colours, label('Icon'), icons, label('Frequency'), freqBox, h('p', { class: 'footnote', text: 'Weeks run Monday to Sunday.' })];
+    // Description: a note to yourself, right under the name (e.g. "Scales first, then the new piece")
+    const desc = h('textarea', { class: 'notes-box habit-desc', placeholder: 'Description', 'aria-label': 'Description', oninput: e => { d.description = e.target.value; } });
+    desc.value = d.description;
+    const parts = [preview, input, desc, label('Colour'), colours, label('Icon'), icons, label('Frequency'), freqBox, h('p', { class: 'footnote', text: 'Weeks run Monday to Sunday.' })];
     if (hb) parts.push(h('div', { class: 'btn-row', style: { marginTop: '24px' } }, [
       h('button', { type: 'button', style: { background: 'var(--field)' }, text: 'Archive', onclick: () => { sheet.close(); archive(hb, true); } }),
       h('button', { type: 'button', class: 'danger', style: { background: 'var(--field)' }, text: 'Delete', onclick: () => { sheet.close(); removeHabit(hb); } })

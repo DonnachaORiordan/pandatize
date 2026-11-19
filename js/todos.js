@@ -8,15 +8,17 @@
 
   T.forDay = day => Pz.data.todos.filter(t => t.date === day);
 
-  // To-dos that live in a list but have a due date also show on a day:
-  // on their due day; on today if overdue and not done; and once ticked, on the day they were ticked (if later).
+  // To-dos that live in a list but have a start date or a due date also show on a day:
+  // on their start day and their due day; on today (every day) once started or overdue, until ticked;
+  // and once ticked, on the day they were ticked (if later).
+  const firstDay = e => (e.start && (!e.due || e.start < e.due) ? e.start : e.due);      // the first day it shows
   T.listEntries = day => {
     const today = D.today(), out = [];
     Pz.data.lists.forEach(l => l.entries.forEach(e => {
-      if (e.kind !== 'todo' || !e.due) return;
+      if (e.kind !== 'todo' || (!e.due && !e.start)) return;
       let show;
-      if (e.done) { const ticked = (e.doneAt || '').slice(0, 10); show = (ticked > e.due ? ticked : e.due) === day; }
-      else show = day === today ? e.due <= today : e.due === day && day > today;
+      if (e.done) { const ticked = (e.doneAt || '').slice(0, 10), from = e.start || e.due; show = (ticked > from ? ticked : from) === day; }
+      else show = day === today ? firstDay(e) <= today : (e.start === day || e.due === day) && day > today;
       if (show) out.push({ list: l, entry: e });
     }));
     return out;
@@ -114,8 +116,9 @@
       h('button', { type: 'button', class: 'todo-check', role: 'checkbox', 'aria-checked': String(e.done), 'aria-label': e.title,
         onclick: ev => { ev.stopPropagation(); Pz.lists.toggle(e); Pz.app.changed(); Pz.fx.todoTick('[data-entry="' + e.id + '"]', e.done); } }, [Pz.icon('check', 14)]),
       h('div', { class: 'main' }, [h('div', { class: 'ttl' }, [h('span', { class: 'strike', text: e.title })]), h('div', { class: 'todo-chips' }, [
-        h('span', { class: 'todo-chip' }, [h('i', { style: { background: l.color } }), h('span', { text: l.name + (e.dueTime ? ' · ' + e.dueTime : '') })]),
-        !e.done && e.due < day && h('span', { class: 'todo-chip' }, [h('span', { text: '→ Carried over from ' + D.dayName(e.due).slice(0, 3) })])
+        h('span', { class: 'todo-chip' }, [h('i', { style: { background: l.color } }), h('span', { text: l.name +
+          (e.due && e.due > day ? ' · due ' + D.short(e.due) : '') + (e.due && e.dueTime ? ' · ' + e.dueTime : '') })]),     // started early: says when it's due
+        !e.done && firstDay(e) < day && h('span', { class: 'todo-chip' }, [h('span', { text: '→ Carried over from ' + D.dayName(firstDay(e)).slice(0, 3) })])
       ])])
     ]);
     return ui.swipeRow(el, () => Pz.lists.deleteEntry(e.id));
