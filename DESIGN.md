@@ -66,7 +66,7 @@ Red #FF453A · Orange #FF9F0A · Yellow #FFD60A · Lime #A8E10C · Green #30D158
 - **Sheets:** slide up from the bottom, with a grabber bar and Cancel / Title / Save across the top. iOS-style grouped rows inside. The screen behind is dimmed.
 
 ## 7. Calendar month view = "open grid"
-- Header: ‹ November 2026 › arrows (arrows change the month, no swiping), then search, filter and + buttons, then a Month / Week / Day / Agenda switch.
+- Header: ‹ November 2026 › arrows (arrows change the month; since 19 Nov 2026 a sideways swipe starting in the middle of the screen does too, see section 10), then search, filter and + buttons, then a Month / Week / Day / Agenda switch.
 - A row of weekday letters, M T W T F S S (weeks start on Monday).
 - The whole month sits on one rounded card (card colour, 22px corners, 4px padding). No boxes around individual days. Each week row is separated by a 1px hairline.
 - Each day is 80px tall. The date number is centred at the top (15px, regular weight) inside a 28px circle. Today's circle is filled with the text colour, with the number in the background colour.
@@ -133,6 +133,7 @@ Today, Celebration (confetti at 100%), Streak milestone (7/30/100), Habits (with
 - **Habit history squares in light mode (changed 17 Nov 2026):** a missed day is a white square with a thin outline in a soft tint of the habit colour, so it still shows when the card is filled with colour. The grey squares (days before the habit existed, and a weekly habit's days off) are a see-through dark grey that darkens whatever is behind it, so they show on a white card and on a colour-filled card alike. (Dark mode is unchanged.)
 - **Year graph labels (changed 17 Nov 2026):** the months under the Year graph read Jan, Feb, Mar, Apr, May, June, July, Aug, Sept, Oct, Nov, Dec, written at a slant (about 45°, never fully vertical) so all twelve fit.
 - **Undo after every delete (added 17 Nov 2026):** whenever anything is deleted (an event, to-do, note, list, category, habit, or anything added later), a small "Deleted … · Undo" message shows for a few seconds and Undo puts it back exactly as it was. This is on top of any "are you sure?" question.
+- **Calendar swiping (changed 19 Nov 2026):** on the Calendar tab, a sideways swipe that starts in the middle of the screen changes the month / week / day: the calendar follows the finger, slides off, and the next (or previous) one slides in from the other side (Reduce Motion: a quick fade). A swipe that starts in the outer 15% at either edge changes tab as before. Agenda: every swipe changes tab. While the day panel is open, swiping does nothing (as before).
 - **Quick pin (added 17 Nov 2026):** every note and to-do card inside a list has a small pin button at its top right: hollow when not pinned, filled when pinned. One tap pins it to the top (or un-pins it) without opening it. The pin is drawn tilted at an angle (about 40°; changed 19 Nov 2026). Lists themselves (the cards on the Lists screen) have NO pin.
 - **Be flexible about input:** time and date fields accept loose typing such as "7:30pm", "19:30", "tomorrow" or "next fri". Search ignores capital letters and tolerates small typos.
 - Respect the iPhone's "Reduce Motion" setting: if it's on, use simple fades instead of bounces, flying squares and confetti.

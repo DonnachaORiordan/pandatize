@@ -24,6 +24,56 @@
       }
     });
     render();
+    swipePeriods(page);
+  }
+
+  // ---- Swiping: next / previous month, week or day (changed 19 Nov 2026, SPEC.md section 2) ----
+  // The screen is split into three strips. A swipe that STARTS in the outer 15% on either side
+  // changes tab (handled in nav.js); one that starts in the middle is ours. Agenda has no periods,
+  // so there every swipe changes tab.
+  const EDGE = 0.15;
+  function ownsSwipe(x) {
+    if (view === 'agenda') return false;
+    const r = document.getElementById('app').getBoundingClientRect();
+    return x > r.left + r.width * EDGE && x < r.right - r.width * EDGE;
+  }
+  function swipePeriods(page) {
+    let busy = false;
+    // Move the calendar sideways by x pixels, over "ms" milliseconds (0 = straight away, following the finger)
+    const slide = (x, ms) => {
+      viewEl.style.transition = ms ? 'transform ' + ms + 'ms cubic-bezier(.3,.7,.3,1)' : 'none';
+      viewEl.style.transform = x ? 'translateX(' + x + 'px)' : '';
+    };
+    ui.hdrag(page, {
+      accept: (dx, target, startX) => {
+        if (busy || panel || ui.modalOpen() || !ownsSwipe(startX)) return false;
+        if (target.closest('input, textarea, select, [data-noswipe]')) return false;
+        const row = target.closest('[data-swiperow]');             // a LEFT swipe on a to-do row deletes it instead
+        if (row) return dx > 0 && !row.pzIsOpen();
+        return true;
+      },
+      move: dx => { if (!Pz.fx.reduced()) slide(dx, 0); },         // the calendar follows the finger
+      end: (dx, speed) => {
+        const dir = dx < -60 || (dx < -20 && speed < -0.4) ? 1 : dx > 60 || (dx > 20 && speed > 0.4) ? -1 : 0;
+        if (!dir) { slide(0, 200); return; }                         // not far enough: spring back
+        if (Pz.fx.reduced()) {                                       // Reduce Motion: a quick fade instead of sliding
+          move(dir);
+          if (viewEl.animate) viewEl.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' });
+          return;
+        }
+        // Slide off to one side, change month/week/day, then slide the new one in from the other side
+        busy = true;
+        const w = viewEl.offsetWidth;
+        slide(-dir * w, 150);
+        setTimeout(() => {
+          move(dir);
+          slide(dir * w, 0);
+          void viewEl.offsetWidth;                                   // (makes the browser place it before sliding back in)
+          slide(0, 240);
+          setTimeout(() => { viewEl.style.transition = ''; busy = false; }, 260);
+        }, 150);
+      }
+    });
   }
 
   function render(keepScroll) { renderHead(); renderView(keepScroll); }
@@ -357,5 +407,5 @@
     if (card) Pz.fx.play(card, 'grow');
   }
 
-  Pz.calendar = { init: init, refresh: refresh, tick: tick, shown: shown, closePanel: closePanel, panelOpen: () => !!panel, deleteItem: deleteItem, goDay: goDay, timeGrid: timeGrid };
+  Pz.calendar = { init: init, refresh: refresh, tick: tick, shown: shown, ownsSwipe: ownsSwipe, closePanel: closePanel, panelOpen: () => !!panel, deleteItem: deleteItem, goDay: goDay, timeGrid: timeGrid };
 })();

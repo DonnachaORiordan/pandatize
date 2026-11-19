@@ -16,7 +16,7 @@ Pandatize is my habit tracker + calendar + to-do lists/notes app for my iPhone (
 - Respect the iPhone "Reduce Motion" setting (DESIGN.md section 10).
 
 ## 2. Navigation
-- Floating tab bar: Today, Habits, Calendar, Lists. Tap a tab or swipe left/right to move between tabs (quick slide). Swiping doesn't change tabs while a sheet or panel is open, or when the swipe starts on something that scrolls sideways or a row being swiped to delete.
+- Floating tab bar: Today, Habits, Calendar, Lists. Tap a tab or swipe left/right to move between tabs (quick slide). **On the Calendar tab (changed 19 Nov 2026)** the screen is split into three strips: a swipe that STARTS in the outer 15% on the left or right edge changes tab (to Habits / Lists); a swipe that starts anywhere in the middle changes the month / week / day being shown (swipe left = next, right = previous). In Agenda (which has no periods) every swipe changes tab. Swiping doesn't change tabs while a sheet or panel is open, or when the swipe starts on something that scrolls sideways or a row being swiped to delete.
 - Settings opens from the gear button on Today.
 - Until a tab is built, it shows a simple, nicely styled "Coming soon" screen.
 
@@ -96,7 +96,7 @@ There are three types of item. All have: title, category (sets the colour), loca
 
 ## 5. Calendar views
 All views share the header (DESIGN.md section 7): ‹ title › arrows, search, filter and + buttons, and the Month / Week / Day / Agenda switch. The app remembers the last view used. Tapping the title jumps back to today.
-- **Month:** the "open grid" (DESIGN.md section 7). Coloured lines only, no titles; to-do count badge; arrows (not swiping) change month. Tapping a day slides up the **day panel**: that day's events, deadlines, all-day items and to-dos with titles and times, plus a + button to add to that day and an "Open day" link to the Day view.
+- **Month:** the "open grid" (DESIGN.md section 7). Coloured lines only, no titles; to-do count badge; arrows or a swipe in the middle of the screen change month (see section 2). Tapping a day slides up the **day panel**: that day's events, deadlines, all-day items and to-dos with titles and times, plus a + button to add to that day and an "Open day" link to the Day view.
 - **Week:** 7 columns with a time grid; events as blocks, deadlines as flagged lines, all-day items in a strip at the top, a "now" line. Arrows change week. Tap a day's header to open its Day view.
 - **Day:** that day's to-do list at the top, then the all-day strip, then the time grid (events as blocks with title, time and location; deadlines as lines with a flag and title; "now" line). A mini week strip picks other days. Tap an empty time slot to add an event there.
 - **Agenda:** a scrolling list of upcoming items grouped by date ("Today · Tue 17 Nov", "Wed 18 Nov"…), with countdown chips on deadlines. Loads more as I scroll. Days with nothing are skipped.

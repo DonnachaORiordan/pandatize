@@ -323,7 +323,7 @@
       if (!decided) {
         if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
         decided = true;
-        if (Math.abs(dx) > Math.abs(dy) * 1.2 && (!o.accept || o.accept(dx, target))) {
+        if (Math.abs(dx) > Math.abs(dy) * 1.2 && (!o.accept || o.accept(dx, target, sx))) {      // sx = where the finger started
           active = true;
           try { el.setPointerCapture(id); } catch (err) { /* fine */ }
         } else { id = null; return; }

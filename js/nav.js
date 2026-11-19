@@ -44,8 +44,10 @@
     });
 
     ui.hdrag(document.getElementById('tabs-viewport'), {
-      accept: (dx, target) => {
+      accept: (dx, target, startX) => {
         if (blocked()) return false;
+        // On the Calendar tab, a swipe starting in the middle belongs to the calendar (next/previous month, week or day)
+        if (tabs[index].id === 'calendar' && Pz.calendar.ownsSwipe(startX)) return false;
         if (target.closest('input, textarea, select, [data-noswipe]')) return false;
         // On a swipe-to-delete row, a LEFT swipe belongs to the row; a right swipe can still change tab.
         const row = target.closest('[data-swiperow]');
