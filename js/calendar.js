@@ -41,7 +41,7 @@
     let busy = false;
     // Move the calendar sideways by x pixels, over "ms" milliseconds (0 = straight away, following the finger)
     const slide = (x, ms) => {
-      viewEl.style.transition = ms ? 'transform ' + ms + 'ms cubic-bezier(.3,.7,.3,1)' : 'none';
+      viewEl.style.transition = ms ? 'transform ' + ms + 'ms cubic-bezier(.22,.72,.26,1)' : 'none';      // same curve as the outgoing picture
       viewEl.style.transform = x ? 'translateX(' + x + 'px)' : '';
     };
     ui.hdrag(page, {
@@ -52,7 +52,7 @@
         if (row) return dx > 0 && !row.pzIsOpen();
         return true;
       },
-      move: dx => { if (!Pz.fx.reduced()) slide(dx * 0.5, 0); },   // the calendar follows the finger (with a little resistance)
+      move: dx => { if (!Pz.fx.reduced()) slide(dx * 0.8, 0); },   // the calendar follows the finger (with a little resistance)
       end: (dx, speed) => {
         const dir = dx < -60 || (dx < -20 && speed < -0.4) ? 1 : dx > 60 || (dx > 20 && speed > 0.4) ? -1 : 0;
         if (!dir) { slide(0, 200); return; }                         // not far enough: spring back
@@ -64,7 +64,7 @@
         // Like turning a page: a picture of the old month/week/day slides out while the new one
         // slides in right behind it, at the same time, so there's never a blank moment.
         busy = true;
-        const w = viewEl.offsetWidth, from = dx * 0.5;
+        const w = viewEl.offsetWidth, from = dx * 0.8;
         const old = viewEl.cloneNode(true);
         Object.assign(old.style, { position: 'absolute', top: viewEl.offsetTop + 'px', left: viewEl.offsetLeft + 'px', width: w + 'px',
           height: viewEl.offsetHeight + 'px', margin: '0', pointerEvents: 'none', transition: 'none', transform: 'translateX(' + from + 'px)' });
@@ -77,10 +77,10 @@
         move(dir);                                                   // the real calendar now shows the new period…
         slide(dir * w + from, 0);                                    // …waiting just off-screen on the other side
         void viewEl.offsetWidth;                                     // (makes the browser place both before they move)
-        const ease = 'transform 260ms cubic-bezier(.3,.7,.3,1)';
+        const ease = 'transform 380ms cubic-bezier(.22,.72,.26,1)';     // a soft glide that slows gently at the end
         old.style.transition = ease; old.style.transform = 'translateX(' + (-dir * w) + 'px)';
-        slide(0, 260);
-        setTimeout(() => { old.remove(); viewEl.style.transition = ''; busy = false; }, 280);
+        slide(0, 380);
+        setTimeout(() => { old.remove(); viewEl.style.transition = ''; busy = false; }, 400);
       }
     });
   }
@@ -92,7 +92,8 @@
     closePanel();
     if (view === 'month') cursor = D.addMonths(cursor, dir);
     else cursor = D.addDays(cursor, dir * (view === 'week' ? 7 : 1));
-    render();
+    // Day and week: the time grid stays at the same time of day (it used to jump back to 08:00, which felt jumpy)
+    renderHead(); renderView(view === 'day' || view === 'week');
   }
   // The + button adds to the day you're looking at.
   const addDate = () => view === 'day' ? cursor : panelDate || today;

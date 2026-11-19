@@ -274,4 +274,6 @@ Small things the plan didn't spell out, chosen to fit sections 1–11 and DESIGN
 
 **After step 6 (19 Nov 2026)**
 - **Calendar swiping:** see section 2. The edge strips are 15% of the screen width on each side.
+- **iPhone swipe fix:** when the iPhone cancels a touch (because it starts scrolling the page), it reports the finger at the far left edge. That was read as a big left swipe, so a right swipe on Habits went to the Calendar. Now the last real finger position is used, and once a sideways swipe has started the page isn't allowed to scroll up/down.
+- **Changing day/week keeps the time of day** in the time grid (by swipe or arrows); it no longer jumps back to 08:00.
 - **Swipes are never taps:** a finger that moves more than 10 px before lifting is never treated as a tap (fixes a swipe from Habits to Today landing on Today's "Open day" link and jumping to the Calendar on the iPhone).

@@ -357,10 +357,14 @@
       const eat = ev => { ev.stopPropagation(); ev.preventDefault(); };
       el.addEventListener('click', eat, true);
       setTimeout(() => el.removeEventListener('click', eat, true), 320);
-      o.end(e.clientX - sx, vx);
+      // (On the iPhone a cancelled touch reports its position as 0, the far left edge. That was read as a big
+      // left swipe, so a right swipe on Habits went to the Calendar. Use the last real position instead.)
+      o.end((e.type === 'pointercancel' ? lastX : e.clientX) - sx, vx);
     };
     el.addEventListener('pointerup', finish);
     el.addEventListener('pointercancel', finish);
+    // Once a sideways swipe has started, stop the iPhone from scrolling the page up/down (which would cancel the swipe)
+    el.addEventListener('touchmove', e => { if (active) e.preventDefault(); }, { passive: false });
   };
 
   // ---- Swipe left to delete ----
