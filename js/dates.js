@@ -18,9 +18,13 @@
   D.nowMin = () => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); };
   D.nowDT = () => D.today() + 'T' + D.fromMin(D.nowMin());      // this very minute, e.g. "2026-11-17T19:30"
   D.duration = m => m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '');   // "40 min", "1 h 40 min"
-  D.addDays = (s, n) => { const d = D.parse(s); d.setDate(d.getDate() + n); return D.ymd(d); };
+  // Speed (step 6): addDays and dow run thousands of times when drawing the calendar, and their answers
+  // never change, so answers already worked out are remembered (the memory is emptied when it gets big).
+  const memo = new Map();
+  const remember = (key, work) => { let v = memo.get(key); if (v === undefined) { if (memo.size > 50000) memo.clear(); v = work(); memo.set(key, v); } return v; };
+  D.addDays = (s, n) => remember(s.slice(0, 10) + '+' + n, () => { const d = D.parse(s); d.setDate(d.getDate() + n); return D.ymd(d); });
   D.addMonths = (s, n) => { const d = D.parse(s); d.setDate(1); d.setMonth(d.getMonth() + n); return D.ymd(d); };
-  D.dow = s => { const g = D.parse(s).getDay(); return g === 0 ? 7 : g; };          // Mon = 1 … Sun = 7
+  D.dow = s => remember(s.slice(0, 10) + 'w', () => { const g = D.parse(s).getDay(); return g === 0 ? 7 : g; });          // Mon = 1 … Sun = 7
   D.monday = s => D.addDays(s, 1 - D.dow(s));
   D.diffDays = (a, b) => Math.round((D.parse(b) - D.parse(a)) / 86400000);
   D.toMin = t => +t.slice(0, 2) * 60 + +t.slice(3, 5);

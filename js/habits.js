@@ -65,7 +65,16 @@
     return best;
   }
   // Best streak never goes down: the larger of the remembered best and the longest in the history.
-  H.best = h => Math.max(h.best || 0, longest(h));
+  // Speed (step 6): the longest run is worked out once and remembered until the habit's ticks or target change.
+  const longCache = new WeakMap();
+  const longestKept = h => {
+    const c = longCache.get(h);
+    if (c && c.done === h.done && c.type === h.freq.type && c.times === h.freq.times) return c.n;
+    const n = longest(h);
+    longCache.set(h, { done: h.done, type: h.freq.type, times: h.freq.times, n: n });
+    return n;
+  };
+  H.best = h => Math.max(h.best || 0, longestKept(h));
   // Remember each best when the app opens (not on every tick, so an accidental tick that is
   // straight away un-ticked doesn't leave a best streak that never really happened).
   H.rememberBests = () => {

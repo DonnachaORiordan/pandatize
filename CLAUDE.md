@@ -13,7 +13,8 @@
 
 ## The project
 - Pandatize: my habit tracker + calendar + lists app, built as an iPhone progressive web app.
-- **SPEC.md** = the whole app, planned in full, and the 6 build steps (section 12). Check the ticks there to see which step we're on.
+- **The app is complete:** all 6 build steps are done (19 Nov 2026) and it's live on GitHub Pages. From now on, work is fixes and small changes I ask for. Section 13 of SPEC.md (final checks) hasn't been fully tested yet, so if something seems broken, check there first.
+- **SPEC.md** = the whole app, planned in full, and the 6 build steps (section 12).
 - **DESIGN.md** = exactly how everything looks and moves. Follow it exactly; don't redesign anything.
 - **logo.png** = my app logo. Use it as it is; never redraw it.
 

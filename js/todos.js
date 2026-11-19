@@ -102,6 +102,7 @@
         onclick: e => { e.stopPropagation(); T.toggle(t); Pz.app.changed(); Pz.fx.todoTick('.todo-row[data-todo="' + t.id + '"]', t.done); } }, [Pz.icon('check', 14)]),
       h('div', { class: 'main' }, [h('div', { class: 'ttl' }, [h('span', { class: 'strike', text: t.title })]), chip])
     ]);
+    ui.tapZone(el, 'left', () => el.querySelector('.todo-check'));      // bigger hit area: the row's left part ticks it
     return ui.swipeRow(el, () => {
       const undo = T.remove(t.id);
       Pz.app.changed();
@@ -121,6 +122,7 @@
         !e.done && firstDay(e) < day && h('span', { class: 'todo-chip' }, [h('span', { text: '→ Carried over from ' + D.dayName(firstDay(e)).slice(0, 3) })])
       ])])
     ]);
+    ui.tapZone(el, 'left', () => el.querySelector('.todo-check'));
     return ui.swipeRow(el, () => Pz.lists.deleteEntry(e.id));
   }
 

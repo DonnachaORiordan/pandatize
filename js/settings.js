@@ -14,6 +14,8 @@
     // Drawn again after an import, so the Sounds switch shows the imported setting
     const draw = () => {
       box.innerHTML = '';
+      const nudge = backupNudge();
+      if (nudge) box.appendChild(nudge);
       box.appendChild(h('div', { class: 'group' }, [row('tag', 'Categories', chev(), Pz.categories.openScreen)]));
       box.appendChild(h('div', { class: 'group' }, [
         // Appearance: Auto = whatever the phone is set to; or always Light / always Dark
@@ -41,11 +43,27 @@
     draw();
   }
 
+  // ---------- Backup nudge (build step 6) ----------
+  // A gentle card at the top of Settings when the last backup is more than 30 days old (or there's never been one).
+  function backupNudge() {
+    const last = Pz.data.settings.lastExport;
+    const days = last ? Math.floor((Date.now() - new Date(last).getTime()) / 86400000) : null;
+    if (days !== null && days < 30) return null;
+    return h('div', { class: 'card nudge' }, [
+      h('span', { class: 'row-icon' }, [Pz.icon('upload', 20)]),
+      h('div', { class: 'row-grow' }, [
+        h('b', { text: days === null ? 'No backup yet' : 'Last backup ' + days + ' days ago' }),
+        h('span', { text: 'Save a copy of everything to Files, just in case.' })
+      ]),
+      h('button', { type: 'button', class: 'nudge-btn', text: 'Export now', onclick: exportBackup })
+    ]);
+  }
+
   // ---------- Export ----------
   // On the iPhone: the share menu (choose "Save to Files" › iCloud Drive). On the laptop: a download.
   function exportBackup() {
     const text = S.exportText(), name = S.backupName();
-    const done = () => { S.markExported(); ui.toast('Backup saved'); };
+    const done = () => { S.markExported(); Pz.app.changed(); ui.toast('Backup saved'); };      // (redraws Settings, so the nudge goes away)
     const phone = window.matchMedia && matchMedia('(pointer: coarse)').matches;
     const file = type => new File([text], name, { type: type });
     const canShare = f => phone && navigator.canShare && navigator.share && navigator.canShare({ files: [f] });

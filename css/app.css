@@ -38,7 +38,6 @@
 .round-btn.filled { background: var(--text); color: var(--on-text); }
 .round-btn.big { width: 40px; height: 40px; }
 .round-btn.small { width: 32px; height: 32px; }
-.round-btn::after { content: ''; position: absolute; inset: -5px; }   /* a slightly bigger tap area */
 
 .link { color: var(--accent); font-size: 16px; }
 .back-link { color: var(--accent); display: inline-flex; align-items: center; gap: 2px; font-size: 16px; min-height: 44px; margin-left: -6px; }
@@ -170,3 +169,11 @@
 .btn-row { display: flex; gap: 8px; margin-top: 16px; }
 .btn-row button { flex: 1; min-height: 44px; border-radius: 14px; background: var(--card2); font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .btn-row button:disabled { opacity: .35; }
+
+/* Bigger hit areas (build step 6, DESIGN.md section 10): every small button gets an invisible
+   tap area of at least 48 × 48 px around it, centred on the button, so it's easy to hit with a thumb. */
+.round-btn::after, .x-btn::after, .hw-arrow::after, .stepper button::after, .toggle::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: max(100%, 48px); height: max(100%, 48px); transform: translate(-50%, -50%);
+}
+.x-btn, .hw-arrow, .stepper button { position: relative; }

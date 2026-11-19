@@ -59,7 +59,20 @@
     const out = [], sd = it.start.slice(0, 10);
     if (!it.repeat) { if (sd >= from && sd <= to) out.push(sd); return out; }
     const end = it.repeat.until && it.repeat.until < to ? it.repeat.until : to;
-    for (let d = from < sd ? sd : from; d <= end; d = D.addDays(d, 1)) {
+    const first = from < sd ? sd : from, f = it.repeat.freq;
+    // Speed (step 6): monthly and yearly repeats jump straight to the same date each month / year
+    // instead of checking every single day. (A date that doesn't exist, like 31 Feb, is skipped.)
+    if (f === 'monthly' || f === 'yearly') {
+      let y = +first.slice(0, 4), m = +first.slice(5, 7);
+      while (true) {
+        const d = f === 'yearly' ? y + sd.slice(4) : y + '-' + String(m).padStart(2, '0') + sd.slice(7);
+        if (d.slice(0, 7) > end.slice(0, 7)) break;
+        if (d >= first && d <= end && D.addDays(d, 0) === d && I.occursOn(it, d)) { out.push(d); if (max && out.length >= max) break; }
+        if (f === 'yearly') y++; else if (++m > 12) { m = 1; y++; }
+      }
+      return out;
+    }
+    for (let d = first; d <= end; d = D.addDays(d, 1)) {
       if (I.occursOn(it, d)) { out.push(d); if (max && out.length >= max) break; }
     }
     return out;

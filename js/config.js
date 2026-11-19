@@ -5,8 +5,8 @@ window.Pz = window.Pz || {};   // "Pz" is the one shared box all our files put t
 
 Pz.config = {
   appName: 'Pandatize',
-  version: '0.5.1',
-  buildStep: 5,
+  version: '0.6.0',
+  buildStep: 6,
   storageKey: 'pandatize-data',   // the label our data is saved under on the device
   dataVersion: 3,                 // raise this (and write a converter in storage.js) if the data format changes
 

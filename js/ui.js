@@ -44,6 +44,25 @@
   ui.backLink = (label, onClick) =>
     h('button', { type: 'button', class: 'back-link', onclick: onClick }, [Pz.icon('chevL', 20), h('span', { text: label })]);
 
+  // Bigger hit areas (DESIGN.md section 10): a tap anywhere in one zone of a card or row counts as
+  // a tap on its tick box. side = 'right' (the right third, for habit cards) or 'left' (the first 56px,
+  // for to-do rows). Taps on other buttons inside (chips, the pin…) still do their own thing.
+  ui.tapZone = (el, side, findBox) => {
+    el.addEventListener('click', e => {
+      const inner = e.target.closest('button, a, input, textarea, select, label');
+      if (inner && inner !== el && el.contains(inner)) return;
+      const sw = el.closest('.swipe-row');
+      if (sw && sw.pzIsOpen && sw.pzIsOpen()) return;          // its red Delete is showing: the tap just closes it
+      const r = el.getBoundingClientRect();
+      const hit = side === 'right' ? e.clientX > r.left + r.width * 2 / 3 : e.clientX < r.left + 56;
+      const box = hit && findBox();
+      if (!box) return;
+      e.stopImmediatePropagation(); e.preventDefault();
+      box.click();
+    }, true);
+    return el;
+  };
+
   ui.toggle = (on, onChange) => {
     const b = h('button', { type: 'button', class: 'toggle' + (on ? ' on' : ''), role: 'switch', 'aria-checked': String(!!on) }, [h('i')]);
     b.addEventListener('click', () => { on = !on; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); onChange(on); });

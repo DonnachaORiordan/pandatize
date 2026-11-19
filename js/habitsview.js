@@ -13,6 +13,8 @@
   const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
   const iconSq = (hb, size) => h('span', { class: 'habit-ic', style: { background: hb.color, color: Pz.glyphOn(hb.color), width: size + 'px', height: size + 'px' } }, [Pz.icon(hb.icon, Math.round(size * 0.55))]);
   const flame = () => h('span', { class: 'flame' }, [Pz.icon('flame', 14)]);
+  // Bigger hit area: a tap anywhere on the right third of a habit card (or Today tile) ticks it
+  const zone = card => ui.tapZone(card, 'right', () => card.querySelector('.habit-tick'));
 
   // The tick box: an outline in the habit's colour, filled with a check when done.
   // (The data-… labels let the animations find it again after the screen is redrawn.)
@@ -70,13 +72,13 @@
     const today = D.today();
     const tiles = H.shown().map(hb => {
       const done = H.isDone(hb, today);
-      return h('div', { class: 'habit-tile card' + (done ? ' done' : ''), 'data-habit-card': hb.id, style: { '--hc': hb.color }, role: 'button', onclick: () => Pz.nav.go('habits') }, [
+      return zone(h('div', { class: 'habit-tile card' + (done ? ' done' : ''), 'data-habit-card': hb.id, style: { '--hc': hb.color }, role: 'button', onclick: () => Pz.nav.go('habits') }, [
         h('div', { class: 'ht-top' }, [iconSq(hb, 34), tickBox(hb, today, 30)]),
         h('div', { class: 'ht-title', text: hb.title }),
         H.isWeekly(hb) ? h('div', { class: 'h-sub', text: Math.min(H.weekCount(hb, today), hb.freq.times) + ' of ' + hb.freq.times + ' this week' })
           : h('div', { class: 'h-sub' }, [flame(), h('span', { 'data-streak': hb.id, 'data-kind': 'tile', text: V.streakWords(hb, H.streak(hb), 'tile') })]),
         strip(hb, 7)
-      ]);
+      ]));
     });
     tiles.push(h('button', { type: 'button', class: 'habit-tile all', onclick: () => Pz.nav.go('habits') }, [h('span', { text: 'All habits →' })]));
     return h('div', { class: 'tile-grid' }, tiles);
@@ -117,7 +119,7 @@
     // Habit cards
     const cards = h('div', { class: 'habit-cards' }, habits.map(hb => {
       const done = H.isDone(hb, sel);
-      return h('div', { class: 'habit-card card' + (done ? ' done' : ''), 'data-habit-card': hb.id, style: { '--hc': hb.color }, 'data-reorder': '', role: 'button', onclick: () => openSheet(hb) }, [
+      return zone(h('div', { class: 'habit-card card' + (done ? ' done' : ''), 'data-habit-card': hb.id, style: { '--hc': hb.color }, 'data-reorder': '', role: 'button', onclick: () => openSheet(hb) }, [
         h('div', { class: 'hc-top' }, [
           iconSq(hb, 40),
           h('div', { class: 'main' }, [
@@ -128,7 +130,7 @@
           tickBox(hb, sel, 32)
         ]),
         strip(hb, 20)
-      ]);
+      ]));
     }));
     ui.reorder(cards, (from, to) => {           // press and hold, then drag
       const moved = ui.moveIn(habits.slice(), from, to);

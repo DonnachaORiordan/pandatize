@@ -207,7 +207,9 @@
         h('div', { class: 'side' }, [pinBtn(e, e.title || 'note')])
       ];
     }
-    const wrap = ui.swipeRow(h('div', { class: 'entry-card' + (isDone(e) ? ' done' : ''), 'data-entry': e.id, role: 'button', onclick: () => openEntry(l, e) }, inner), () => deleteEntry(l, e));
+    const card = h('div', { class: 'entry-card' + (isDone(e) ? ' done' : ''), 'data-entry': e.id, role: 'button', onclick: () => openEntry(l, e) }, inner);
+    if (e.kind === 'todo') ui.tapZone(card, 'left', () => card.querySelector('.todo-check'));      // bigger hit area: the card's left part ticks it
+    const wrap = ui.swipeRow(card, () => deleteEntry(l, e));
     wrap.classList.add('entry-wrap');
     wrap.setAttribute('data-reorder', '');
     return wrap;
