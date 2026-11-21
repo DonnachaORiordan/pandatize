@@ -6,7 +6,7 @@
 // manifest). That is how phones notice there is something new to download.
 // (It has to live in this file: phones only check this file for changes.)
 
-const VERSION = 13;
+const VERSION = 14;
 const CACHE = 'pandatize-v' + VERSION;
 
 // Every file the app needs. (logo.png is left out: it's the big original; the app uses the icons.)

@@ -5,7 +5,7 @@
   const D = Pz.dates, ui = Pz.ui, h = ui.h, I = Pz.items;
   const VIEWS = [{ value: 'month', label: 'Month' }, { value: 'week', label: 'Week' }, { value: 'day', label: 'Day' }, { value: 'agenda', label: 'Agenda' }];
   const LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  let headEl, viewEl, view, cursor, today, panel = null, panelDate = null, agendaDays = 90, agendaMore = false;
+  let headEl, viewEl, view, cursor, today, panel = null, panelDate = null, openedAt = 0, agendaDays = 90, agendaMore = false;
   let grownMonth = null;         // the month whose lines have already grown in
 
   const openItem = occ => Pz.itemSheet.open({ id: occ.item.id, key: occ.key });
@@ -25,15 +25,13 @@
     });
     render();
     swipePeriods(page);
-    // While the day panel is open, a tap anywhere above it closes it (my request, 21 Nov 2026).
-    // That includes tapping a day (it no longer switches to that day) and empty space. The header's
-    // buttons (‹ ›, search, filter, +, the view switch) still do their own job, and they close it too.
+    // While the day panel is open, a tap on empty space above it closes it (my request, 21 Nov 2026).
+    // Tapping another day switches straight to that day; tapping the same day closes it. The header's
+    // buttons (‹ ›, search, filter, +, the view switch) still do their own job.
     // (Scrolling the month is not a tap, so it still works with the panel open.)
     page.addEventListener('click', e => {
-      if (!panel) return;
-      if (e.target.closest('.month-day') || !e.target.closest('button, a, input, select, textarea, [role="button"]')) {
-        e.stopPropagation(); e.preventDefault(); closePanel();
-      }
+      if (!panel || e.target.closest('.month-day, button, a, input, select, textarea, [role="button"]')) return;
+      e.stopPropagation(); e.preventDefault(); closePanel();
     }, true);
   }
 
@@ -180,7 +178,11 @@
         row.appendChild(h('button', {
           type: 'button', 'data-day': date, 'aria-label': D.long(date) + ', ' + plural(occ.length, 'item', 'items') + ', ' + plural(left, 'to-do', 'to-dos') + ' left',
           class: 'month-day' + (date.slice(0, 7) !== month ? ' out' : '') + (date === today ? ' today' : '') + (date === panelDate ? ' sel' : ''),
-          onclick: () => { if (panelDate === date) closePanel(); else openPanel(date); }
+          onclick: () => {
+            // (a second tap arriving within a moment of opening is ignored, so the panel can't flicker shut and open again)
+            if (panelDate === date) { if (Date.now() - openedAt > 400) closePanel(); }
+            else openPanel(date);
+          }
         }, [
           h('span', { class: 'num', text: String(D.dayNum(date)) }),
           left > 0 && h('span', { class: 'badge', text: String(left) }),
@@ -383,14 +385,13 @@
   }
   function openPanel(date) {
     panelDate = date;
+    // Opening: one smooth slide up. Already open on another day: it stays still and just shows the
+    // new day (21 Nov 2026: the bounce and the dip looked like it popped up, dropped and popped up again).
     if (!panel) {
+      openedAt = Date.now();
       panel = h('div', { class: 'day-panel' });
       document.getElementById('panels').appendChild(panel);
       Pz.ui.nextFrame(() => { if (panel) panel.classList.add('open'); });
-    } else if (panel.animate && !Pz.fx.reduced()) {
-      // Already open on another day: it dips a few pixels, then springs back up with the new day
-      panel.animate([{ transform: 'none' }, { transform: 'translateY(10px)', offset: 0.35 }, { transform: 'translateY(-3px)', offset: 0.75 }, { transform: 'none' }],
-        { duration: 340, easing: 'ease-in-out' });
     }
     fillPanel(); markSelected();
     panel.querySelector('.panel-list').scrollTop = 0;

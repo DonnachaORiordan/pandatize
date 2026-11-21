@@ -139,6 +139,7 @@
       if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       wrap.classList.remove('open');
       setTimeout(() => wrap.remove(), 340);
+      if (opts.onClose) opts.onClose();
     };
     wrap.appendChild(h('div', { class: 'backdrop' }));
     wrap.appendChild(h('div', { class: 'sheet' }, [
@@ -401,6 +402,38 @@
     content.addEventListener('click', e => { if (open) { e.stopPropagation(); e.preventDefault(); open = false; set(0, true); } }, true);
     wrap.pzIsOpen = () => open;
     return wrap;
+  };
+
+  // A date or time "pill": type into it ("next fri", "7:30pm"), or tap its little icon to open the normal
+  // iPhone picker. (Moved here from itemsheet.js on 21 Nov 2026 so Settings › Categories can use it too.)
+  ui.pill = (kind, value, onChange, opts) => {
+    opts = opts || {};
+    const D = Pz.dates;
+    let val = value || '';
+    const fmt = v => !v ? '' : kind === 'date' ? D.short(v) : v;
+    const text = h('input', { type: 'text', class: 'pill-text', autocomplete: 'off', autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false', enterkeyhint: 'done',
+      placeholder: opts.empty || '', 'aria-label': opts.label || kind });
+    const native = h('input', { type: kind, class: 'pill-native', tabindex: '-1', 'aria-label': (opts.label || kind) + ' picker' });
+    const pick = h('span', { class: 'pill-pick' }, [Pz.icon(kind === 'date' ? 'calendar' : 'clock', 16), native]);
+    const wrap = h('span', { class: 'pill' }, [text, pick]);
+    const size = () => { text.style.width = Math.max(3, (text.value || text.placeholder).length) * 0.62 + 0.4 + 'em'; };
+    const show = () => { text.value = fmt(val); native.value = val; size(); };
+    const commit = v => { const changed = v !== val; val = v; show(); if (changed) onChange(v); };
+    text.addEventListener('focus', () => text.select());
+    text.addEventListener('input', size);
+    text.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); text.blur(); } });
+    text.addEventListener('blur', () => {
+      const raw = text.value.trim();
+      if (raw === fmt(val)) return;
+      if (raw === '' || /^(never|none)$/i.test(raw)) { if (opts.empty) commit(''); else show(); return; }
+      const parsed = kind === 'date' ? D.parseDate(raw) : D.parseTime(raw);
+      if (parsed) commit(parsed);
+      else { wrap.classList.add('bad'); setTimeout(() => wrap.classList.remove('bad'), 700); show(); }   // didn't understand: flash and put it back
+    });
+    native.addEventListener('change', () => { if (native.value) commit(native.value); else if (opts.empty) commit(''); });
+    pick.addEventListener('click', () => { try { if (native.showPicker) native.showPicker(); } catch (e) { /* the tap itself opens it on iPhone */ } });
+    show();
+    return { el: wrap, set: v => { val = v || ''; show(); } };
   };
 
   Pz.ui = ui;

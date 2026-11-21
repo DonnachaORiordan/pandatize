@@ -30,7 +30,40 @@
   C.reminderChoices = [R(0, 'min'), R(5, 'min'), R(15, 'min'), R(30, 'min'), R(1, 'hour'), R(2, 'hour'), R(3, 'hour'),
     R(1, 'day'), R(2, 'day'), R(1, 'week'), R(0, 'day', '09:00'), R(1, 'day', '09:00'), R(1, 'week', '09:00')];
 
-  C.COUNT_DAYS = [1, 2, 3, 5, 7, 10, 14, 21, 30, 45, 60, 90];
+  // "Custom…" reminder (my request, 21 Nov 2026): pick any "N minutes / hours / days / weeks before",
+  // and for days and weeks optionally a set time, e.g. "the night before at 20:00" = 1 day before 20:00.
+  // Opens a small sheet; gives back the reminder, or nothing if cancelled. Works for categories and items.
+  C.pickReminder = () => new Promise(resolve => {
+    const r = { n: 1, unit: 'day', at: '20:00' };
+    let done = false, keepAt = '20:00';
+    const body = h('div');
+    const preview = h('div', { class: 'footnote' });
+    const showPreview = () => { preview.textContent = 'Reminds you ' + (r.n === 0 && !r.at ? 'at the time' : C.reminderLabel(r).replace(/^On the day/, 'on the day')) + '.'; };
+    function render() {
+      body.innerHTML = '';
+      const g = h('div', { class: 'group' });
+      g.appendChild(ui.row('How long before', ui.stepper(r.n, 0, 99, v => { r.n = v; showPreview(); })));
+      const units = ui.segmented([{ value: 'min', label: 'min' }, { value: 'hour', label: 'hours' }, { value: 'day', label: 'days' }, { value: 'week', label: 'weeks' }],
+        r.unit, v => {
+          if (v === 'min' || v === 'hour') { if (r.at) keepAt = r.at; r.at = null; }       // no set time for minutes / hours…
+          else if (r.unit === 'min' || r.unit === 'hour') r.at = keepAt;                   // …and it comes back for days / weeks
+          r.unit = v; render();
+        });
+      units.style.flex = '1';                     // the switch fills the row
+      g.appendChild(h('div', { class: 'row' }, [units]));
+      if (r.unit === 'day' || r.unit === 'week') {
+        g.appendChild(ui.row('At a set time', ui.toggle(!!r.at, on => { if (r.at) keepAt = r.at; r.at = on ? keepAt : null; render(); })));
+        if (r.at) g.appendChild(ui.row('Time', ui.pill('time', r.at, v => { r.at = v; showPreview(); }, { label: 'Reminder time' }).el));
+      }
+      body.appendChild(g); body.appendChild(preview); showPreview();
+    }
+    render();
+    ui.sheet({ title: 'Custom reminder', saveLabel: 'Add', body: body,
+      onSave: close => { done = true; close(); resolve(Object.assign({}, r)); },
+      onClose: () => { if (!done) resolve(null); } });      // Cancel gives back nothing
+  });
+
+  C.COUNT_DAYS =[1, 2, 3, 5, 7, 10, 14, 21, 30, 45, 60, 90];
   C.APPEAR_DAYS = [1, 2, 3, 5, 7, 10, 14, 21, 30];
   C.countdownLabel = days => days + (days === 1 ? ' day before' : ' days before');
   C.appearsLabel = days => days === 30 ? '1 month before' : days === 7 ? '1 week before' : C.countdownLabel(days);
@@ -127,8 +160,10 @@
       ])));
       rem.appendChild(h('button', { type: 'button', class: 'row link', text: '+ Add reminder', onclick: () => {
         const have = c.reminders.map(C.reminderKey);
-        ui.actions({ title: 'Add a reminder', left: true, buttons: C.reminderChoices.filter(r => !have.includes(C.reminderKey(r))).map(r => ({ label: C.reminderLabel(r), value: r })) })
-          .then(r => { if (r) change(() => { c.reminders.push(Object.assign({}, r)); }); });
+        const add = r => { if (r && !have.includes(C.reminderKey(r))) change(() => { c.reminders.push(Object.assign({}, r)); }); };
+        ui.actions({ title: 'Add a reminder', left: true, buttons: C.reminderChoices.filter(r => !have.includes(C.reminderKey(r))).map(r => ({ label: C.reminderLabel(r), value: r }))
+          .concat([{ label: 'Custom…', value: 'custom' }]) })
+          .then(r => { if (r === 'custom') C.pickReminder().then(add); else add(r); });
       } }));
       box.appendChild(rem);
 

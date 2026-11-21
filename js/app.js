@@ -25,12 +25,16 @@
   // the app's height as the screen minus the status bar, which left an empty strip at the bottom.
   // So, only in the iPhone home-screen app, upright, and only if there really is a gap, the app is
   // pinned to the top and stretched to the full screen height. Everywhere else nothing changes.
+  // (Fixed 21 Nov 2026: it now measures the app itself, not the window, which can report the full
+  // height even when the app stops short; and it checks again just after opening.)
   function fitScreen() {
     const app = document.getElementById('app');
-    const full = Math.max(screen.width, screen.height), gap = full - window.innerHeight;
-    const stretch = navigator.standalone === true && window.innerHeight > window.innerWidth && gap > 1 && gap < 120;
-    app.classList.toggle('full-screen', stretch);
-    app.style.height = stretch ? full + 'px' : '';
+    const full = Math.max(screen.width, screen.height);
+    const upright = window.innerWidth < window.innerHeight;
+    if (navigator.standalone !== true || !upright) { app.classList.remove('full-screen'); app.style.height = ''; return; }
+    if (app.classList.contains('full-screen')) return;                 // already stretched
+    const gap = full - app.getBoundingClientRect().height;
+    if (gap > 1 && gap < 150) { app.classList.add('full-screen'); app.style.height = full + 'px'; }
   }
 
   // Called whenever saved data changes, so every screen showing it redraws.
@@ -63,8 +67,10 @@
   function start() {
     document.title = Pz.config.appName;
     fitScreen();
+    [100, 500, 1500].forEach(ms => setTimeout(fitScreen, ms));
     window.addEventListener('resize', fitScreen);
     window.addEventListener('orientationchange', () => setTimeout(fitScreen, 300));
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(fitScreen, 100); });
     Pz.storage.load();
     applyTheme();
     lastDay = Pz.dates.today();

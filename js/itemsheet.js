@@ -5,36 +5,7 @@
   const D = Pz.dates, ui = Pz.ui, h = ui.h, C = Pz.categories, I = Pz.items;
   const clone = o => JSON.parse(JSON.stringify(o));
 
-  // A date or time "pill": type into it ("next fri", "7:30pm"), or tap its little
-  // icon to open the normal iPhone picker.
-  function pill(kind, value, onChange, opts) {
-    opts = opts || {};
-    let val = value || '';
-    const fmt = v => !v ? '' : kind === 'date' ? D.short(v) : v;
-    const text = h('input', { type: 'text', class: 'pill-text', autocomplete: 'off', autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false', enterkeyhint: 'done',
-      placeholder: opts.empty || '', 'aria-label': opts.label || kind });
-    const native = h('input', { type: kind, class: 'pill-native', tabindex: '-1', 'aria-label': (opts.label || kind) + ' picker' });
-    const pick = h('span', { class: 'pill-pick' }, [Pz.icon(kind === 'date' ? 'calendar' : 'clock', 16), native]);
-    const wrap = h('span', { class: 'pill' }, [text, pick]);
-    const size = () => { text.style.width = Math.max(3, (text.value || text.placeholder).length) * 0.62 + 0.4 + 'em'; };
-    const show = () => { text.value = fmt(val); native.value = val; size(); };
-    const commit = v => { const changed = v !== val; val = v; show(); if (changed) onChange(v); };
-    text.addEventListener('focus', () => text.select());
-    text.addEventListener('input', size);
-    text.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); text.blur(); } });
-    text.addEventListener('blur', () => {
-      const raw = text.value.trim();
-      if (raw === fmt(val)) return;
-      if (raw === '' || /^(never|none)$/i.test(raw)) { if (opts.empty) commit(''); else show(); return; }
-      const parsed = kind === 'date' ? D.parseDate(raw) : D.parseTime(raw);
-      if (parsed) commit(parsed);
-      else { wrap.classList.add('bad'); setTimeout(() => wrap.classList.remove('bad'), 700); show(); }   // didn't understand: flash and put it back
-    });
-    native.addEventListener('change', () => { if (native.value) commit(native.value); else if (opts.empty) commit(''); });
-    pick.addEventListener('click', () => { try { if (native.showPicker) native.showPicker(); } catch (e) { /* the tap itself opens it on iPhone */ } });
-    show();
-    return { el: wrap, set: v => { val = v || ''; show(); } };
-  }
+  const pill = ui.pill;            // the date/time pills (in js/ui.js)
 
   function open(opts) {
     opts = opts || {};
@@ -173,11 +144,15 @@
       remBox.appendChild(h('button', { type: 'button', class: 'row link', text: '+ Add reminder', onclick: () => {
         const have = list.map(C.reminderKey);
         const buttons = C.reminderChoices.filter(r => !have.includes(C.reminderKey(r))).map(r => ({ label: C.reminderLabel(r), value: r }));
-        buttons.push({ label: 'Custom date & time…', value: 'exact' });
-        ui.actions({ title: 'Add a reminder', left: true, buttons: buttons }).then(r => {
-          if (!r) return;
-          d.reminders = list.concat([r === 'exact' ? { n: 0, unit: 'exact', at: exactStart() } : Object.assign({}, r)]);
+        buttons.push({ label: 'Custom…', value: 'custom' }, { label: 'Exact date & time…', value: 'exact' });
+        const add = r => {
+          if (!r || (!C.isExact(r) && have.includes(C.reminderKey(r)))) return;     // (already there)
+          d.reminders = list.concat([Object.assign({}, r)]);
           renderReminders();
+        };
+        ui.actions({ title: 'Add a reminder', left: true, buttons: buttons }).then(r => {
+          if (r === 'custom') C.pickReminder().then(add);
+          else add(r === 'exact' ? { n: 0, unit: 'exact', at: exactStart() } : r);
         });
       } }));
     }

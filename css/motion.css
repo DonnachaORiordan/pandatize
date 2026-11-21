@@ -5,7 +5,9 @@
    js/fx.js and js/celebrate.js decide WHEN these play. The "Reduce Motion" rules are at the end. */
 
 /* ---------- Sheets and panels spring up: they overshoot a little and settle back ---------- */
-.sheet-wrap.open .sheet, .sheet-wrap.open .as-box, .day-panel.open { animation: pzSpringUp .52s both; }
+.sheet-wrap.open .sheet, .sheet-wrap.open .as-box { animation: pzSpringUp .52s both; }
+/* The day panel just slides up once, smoothly, with no overshoot (my request, 21 Nov 2026) */
+.day-panel { transition: transform .34s cubic-bezier(.25,.9,.3,1); }
 @keyframes pzSpringUp {
   0%   { transform: translateY(100%); animation-timing-function: cubic-bezier(.2,.75,.35,1); }
   62%  { transform: translateY(-9px);  animation-timing-function: ease-in-out; }
