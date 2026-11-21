@@ -12,6 +12,7 @@
   //   "15 min before"            = { n: 15, unit: 'min',  at: null }
   //   "On the day 09:00"         = { n: 0,  unit: 'day',  at: '09:00' }
   //   "1 week before 09:00"      = { n: 1,  unit: 'week', at: '09:00' }
+  //   Custom date & time         = { n: 0,  unit: 'exact', at: '2026-11-25T14:00' }  (dataVersion 4; items only, not category defaults)
   const r = (n, unit, at) => ({ n: n, unit: unit, at: at || null });
 
   // The 8 starting categories with their defaults (SPEC.md section 4)
@@ -105,7 +106,10 @@
       (data.lists || []).forEach(l => ((l && l.entries) || []).forEach(e => { if (e && e.start === undefined) e.start = null; }));
       if (data.settings && !data.settings.theme) data.settings.theme = 'auto';
       data.dataVersion = 3; return data;
-    }
+    },
+    // Version 3 → 4 (21 Nov 2026): a reminder can now be a custom date & time (unit 'exact').
+    // Older data has none, so nothing needs converting.
+    3: data => { data.dataVersion = 4; return data; }
   };
 
   function upgrade(data) {

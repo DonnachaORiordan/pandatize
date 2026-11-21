@@ -10,14 +10,22 @@
 
   // ---- Wording ----
   const UNIT_MIN = { min: 1, hour: 60, day: 1440, week: 10080, month: 43200 };
-  C.reminderMinutes = r => r.n * UNIT_MIN[r.unit];
+  // A custom reminder (my request, 21 Nov 2026) has unit 'exact' and its own date and time in "at",
+  // e.g. { n: 0, unit: 'exact', at: '2026-11-25T14:00' }. It isn't "N before", so it counts as 0 minutes here.
+  C.isExact = r => r.unit === 'exact';
+  C.reminderMinutes = r => C.isExact(r) ? 0 : r.n * UNIT_MIN[r.unit];
   C.reminderKey = r => r.n + r.unit + (r.at || '');
   C.reminderLabel = r => {
+    if (C.isExact(r)) return Pz.dates.short(r.at) + ' ' + r.at.slice(11, 16);
     if (r.n === 0) return r.at ? 'On the day ' + r.at : 'At the time';
     const unit = r.unit === 'min' ? 'min' : r.unit + (r.n === 1 ? '' : 's');
     return r.n + ' ' + unit + ' before' + (r.at ? ' ' + r.at : '');
   };
-  C.sortReminders = list => list.slice().sort((a, b) => C.reminderMinutes(b) - C.reminderMinutes(a));
+  // "N before" reminders first (furthest ahead first), then custom ones in date order.
+  C.sortReminders = list => list.slice().sort((a, b) =>
+    C.isExact(a) !== C.isExact(b) ? (C.isExact(a) ? 1 : -1)
+      : C.isExact(a) ? (a.at < b.at ? -1 : a.at > b.at ? 1 : 0)
+      : C.reminderMinutes(b) - C.reminderMinutes(a));
   const R = (n, unit, at) => ({ n: n, unit: unit, at: at || null });
   C.reminderChoices = [R(0, 'min'), R(5, 'min'), R(15, 'min'), R(30, 'min'), R(1, 'hour'), R(2, 'hour'), R(3, 'hour'),
     R(1, 'day'), R(2, 'day'), R(1, 'week'), R(0, 'day', '09:00'), R(1, 'day', '09:00'), R(1, 'week', '09:00')];

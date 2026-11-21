@@ -8,7 +8,7 @@ Pandatize is my habit tracker + calendar + to-do lists/notes app for my iPhone (
 - Plain HTML, CSS and JavaScript. No frameworks, no build tools, no Node.js. Must work by double-clicking index.html on my laptop (except the offline/home-screen features, which only work on the live site).
 - The app name is written in ONE place: js/config.js.
 - All saving and loading code is in ONE file: js/storage.js (so online syncing could be added one day).
-- Data is saved on the device with a `dataVersion` number (started at 1; now 3). Design the data shape in step 1 for the WHOLE app (habits, categories, calendar items, to-dos, lists, settings), so later steps don't need a data conversion. If the format ever has to change, raise dataVersion and write a converter. Use localStorage unless the data could outgrow it; if so use IndexedDB, still only inside storage.js.
+- Data is saved on the device with a `dataVersion` number (started at 1; now 4). Design the data shape in step 1 for the WHOLE app (habits, categories, calendar items, to-dos, lists, settings), so later steps don't need a data conversion. If the format ever has to change, raise dataVersion and write a converter. Use localStorage unless the data could outgrow it; if so use IndexedDB, still only inside storage.js.
 - Progressive web app: manifest.json, home-screen icons made from logo.png, and a service worker so it works offline. The service worker has a version number that must go up every time any app file changes.
 - Hosting: GitHub Pages from a PUBLIC GitHub repo called `pandatize` (live at https://donnachaoriordan.github.io/pandatize/). Never put personal data, backups, passwords or keys in the repo.
 - Any outside library, sound or image: tell me its name, source and licence first and wait for my OK. Relaxed licences only (MIT, BSD, CC0, CC-BY with credit). List everything in CREDITS.md. Prefer drawing things ourselves (SVG) and making simple sounds in code.
@@ -92,6 +92,7 @@ There are three types of item. All have: title, category (sets the colour), loca
 - iPhone web apps can't send real notifications without a server, so reminders live inside the app:
   - A **bell button** on Today (beside the gear) with a red count badge. It opens a panel listing reminders that have come due and not been dismissed (item title, "in 2 hours" / "tomorrow 09:30", category colour). Tap one to open the item; swipe or "Clear all" to dismiss.
   - If the app is open when a reminder comes due, a small banner slides down from the top for a few seconds.
+  - **Custom date & time (added 21 Nov 2026):** on an item, "+ Add reminder" also offers "Custom date & time…", to be reminded at an exact moment I pick, alongside the built-in "N before" options.
 - Real phone notifications are on the Later list.
 
 ## 5. Calendar views
@@ -191,7 +192,7 @@ Small things the plan didn't spell out, chosen to fit sections 1–11 and DESIGN
 - **Moving the start** of an event moves its end too, keeping the same length.
 - **Ticking a deadline:** tap its coloured flag square in the day panel or Agenda (it becomes a tick; the row fades with a line through it). In the edit sheet a deadline also has a "Done" switch. On the Week/Day time grids, tap the flag to open the sheet.
 - **Swipe left to delete:** a short swipe shows a red Delete button; a long swipe deletes at once. Either way a "Deleted · Undo" message appears for a few seconds. Swiping RIGHT on such a row still changes tab.
-- **Day panel:** closes by tapping the grabber, dragging it down, tapping the same day again, or changing view. Tapping another day switches the panel to that day.
+- **Day panel:** closes by tapping the grabber, dragging it down, tapping the same day again, or changing view. **Changed 21 Nov 2026:** a tap anywhere above the panel also closes it, including on another day (which no longer switches the panel to that day; tap it again to open it).
 - **Day view header:** the back link ("‹ November") and the search/filter/+ buttons share the top row; the big day title with its ‹ › arrows (previous/next day) sits on the row below, because all of it doesn't fit on one row at 30px.
 - **Agenda:** has no ‹ › arrows (it always starts from today). An event that runs past midnight is listed under each day it covers.
 - **Month view:** shows at most 6 lines per day.
@@ -277,3 +278,9 @@ Small things the plan didn't spell out, chosen to fit sections 1–11 and DESIGN
 - **iPhone swipe fix:** when the iPhone cancels a touch (because it starts scrolling the page), it reports the finger at the far left edge. That was read as a big left swipe, so a right swipe on Habits went to the Calendar. Now the last real finger position is used, and once a sideways swipe has started the page isn't allowed to scroll up/down.
 - **Changing day/week keeps the time of day** in the time grid (by swipe or arrows); it no longer jumps back to 08:00.
 - **Swipes are never taps:** a finger that moves more than 10 px before lifting is never treated as a tap (fixes a swipe from Habits to Today landing on Today's "Open day" link and jumping to the Calendar on the iPhone).
+
+**My requests, 21 Nov 2026**
+- **No double-tap zoom:** every part of the app tells the iPhone that a quick double tap is two taps, not "zoom in" (`touch-action: manipulation`, one rule in css/theme.css; the places that handle their own swipes keep their stricter setting). The page also no longer zooms in when a text box is tapped. Pinch-to-zoom still works.
+- **Custom reminder:** "+ Add reminder" in the item sheet ends with "Custom date & time…". It adds a row with a bell, a date pill and a time pill (type into them or tap their icons, like Starts / Ends) and ×. It starts 1 hour before the item (all-day: 09:00 the day before). Saved as `{ n: 0, unit: 'exact', at: '2026-11-25T14:00' }`; **dataVersion 4** (nothing to convert). Only on items, not in category defaults (a fixed date makes no sense as a default). In the bell it comes up once, at that moment, linked to the item's next occurrence on or after that day (a one-off item: its only one), and stays until dismissed, the deadline is ticked, or the later of the item's day and the reminder's day is over. If a repeating series is split ("This and future ones"), it still only shows once.
+- **Day panel:** a tap anywhere above it closes it (see Step 1 decisions). Header buttons (‹ ›, search, filter, +, the view switch) still do their own job. Scrolling the month with the panel open still works.
+- **Whole screen:** from the home-screen icon, iOS can report the app's height as the screen minus the status bar, leaving an empty strip at the bottom. js/app.js checks for that gap (iPhone home-screen app, upright, gap under 120 px) and, only then, pins the app to the top and stretches it to the full screen height. In Safari or on the laptop nothing changes.

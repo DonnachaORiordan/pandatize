@@ -8,7 +8,7 @@ Pz.config = {
   version: '0.6.0',
   buildStep: 6,
   storageKey: 'pandatize-data',   // the label our data is saved under on the device
-  dataVersion: 3,                 // raise this (and write a converter in storage.js) if the data format changes
+  dataVersion: 4,                 // raise this (and write a converter in storage.js) if the data format changes
 
   // The 12-colour palette (DESIGN.md section 4)
   palette: [

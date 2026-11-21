@@ -25,6 +25,16 @@
     });
     render();
     swipePeriods(page);
+    // While the day panel is open, a tap anywhere above it closes it (my request, 21 Nov 2026).
+    // That includes tapping a day (it no longer switches to that day) and empty space. The header's
+    // buttons (‹ ›, search, filter, +, the view switch) still do their own job, and they close it too.
+    // (Scrolling the month is not a tap, so it still works with the panel open.)
+    page.addEventListener('click', e => {
+      if (!panel) return;
+      if (e.target.closest('.month-day') || !e.target.closest('button, a, input, select, textarea, [role="button"]')) {
+        e.stopPropagation(); e.preventDefault(); closePanel();
+      }
+    }, true);
   }
 
   // ---- Swiping: next / previous month, week or day (changed 19 Nov 2026, SPEC.md section 2) ----

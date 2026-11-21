@@ -39,17 +39,34 @@
   // Every reminder that has come due and hasn't been dismissed (newest first).
   R.entries = () => {
     const I = Pz.items, C = Pz.categories, today = D.today(), now = nowDT(), gone = Pz.data.reminders.dismissed, out = [];
+    const exactSeen = {};      // (a series split in two keeps its custom reminder in both halves: show it once)
     Pz.data.items.forEach(it => {
-      const rems = I.effective(it).reminders;
-      if (!rems.length) return;
-      const lead = Math.ceil(Math.max.apply(null, rems.map(C.reminderMinutes)) / 1440) + 1;       // how far ahead to look
-      I.keysBetween(it, D.addDays(today, -7), D.addDays(today, lead)).forEach(key => {
-        const o = I.occ(it, key);
-        if (o.endDate < today || o.done) return;               // over, or a ticked deadline
-        rems.forEach(r => {
-          const id = it.id + '|' + key + '|' + C.reminderKey(r), due = dueAt(o, r);
-          if (due <= now && !gone[id]) out.push({ id: id, due: due, title: it.title, color: o.color, o: o });
+      const all = I.effective(it).reminders;
+      const rems = all.filter(r => !C.isExact(r)), exact = all.filter(C.isExact);
+      if (rems.length) {
+        const lead = Math.ceil(Math.max.apply(null, rems.map(C.reminderMinutes)) / 1440) + 1;       // how far ahead to look
+        I.keysBetween(it, D.addDays(today, -7), D.addDays(today, lead)).forEach(key => {
+          const o = I.occ(it, key);
+          if (o.endDate < today || o.done) return;               // over, or a ticked deadline
+          rems.forEach(r => {
+            const id = it.id + '|' + key + '|' + C.reminderKey(r), due = dueAt(o, r);
+            if (due <= now && !gone[id]) out.push({ id: id, due: due, title: it.title, color: o.color, o: o });
+          });
         });
+      }
+      // Custom date & time reminders: each comes up once, at its own moment, for the item's next
+      // occurrence on or after that day (a one-off item: its only one).
+      exact.forEach(r => {
+        if (r.at > now) return;
+        const rDay = r.at.slice(0, 10);
+        const key = it.repeat ? I.next(it, rDay) : I.startDate(it);
+        if (!key) return;                                        // the series had already ended
+        const o = I.occ(it, key), last = o.endDate > rDay ? o.endDate : rDay;
+        if (last < today || o.done) return;                      // over, or a ticked deadline
+        const id = it.id + '|' + last + '|' + key + '|' + C.reminderKey(r), twin = it.title + '|' + r.at;
+        if (gone[id] || exactSeen[twin]) return;
+        exactSeen[twin] = true;
+        out.push({ id: id, due: r.at, title: it.title, color: o.color, o: o });
       });
     });
     // Auto-tasks come up again as often as their "reminders" setting says, until ticked.

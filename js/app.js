@@ -20,6 +20,19 @@
     if (phoneDark.addEventListener) phoneDark.addEventListener('change', follow); else if (phoneDark.addListener) phoneDark.addListener(follow);
   }
 
+  // ---- Use the whole screen (my request, 21 Nov 2026) ----
+  // Opened from the iPhone home screen, the app is drawn under the status bar, but iOS can report
+  // the app's height as the screen minus the status bar, which left an empty strip at the bottom.
+  // So, only in the iPhone home-screen app, upright, and only if there really is a gap, the app is
+  // pinned to the top and stretched to the full screen height. Everywhere else nothing changes.
+  function fitScreen() {
+    const app = document.getElementById('app');
+    const full = Math.max(screen.width, screen.height), gap = full - window.innerHeight;
+    const stretch = navigator.standalone === true && window.innerHeight > window.innerWidth && gap > 1 && gap < 120;
+    app.classList.toggle('full-screen', stretch);
+    app.style.height = stretch ? full + 'px' : '';
+  }
+
   // Called whenever saved data changes, so every screen showing it redraws.
   function changed() {
     applyTheme();                     // (an imported backup may bring a different Appearance setting)
@@ -49,6 +62,9 @@
 
   function start() {
     document.title = Pz.config.appName;
+    fitScreen();
+    window.addEventListener('resize', fitScreen);
+    window.addEventListener('orientationchange', () => setTimeout(fitScreen, 300));
     Pz.storage.load();
     applyTheme();
     lastDay = Pz.dates.today();

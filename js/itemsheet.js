@@ -163,17 +163,37 @@
       remBox.innerHTML = '';
       // null = still following the category default
       const list = C.sortReminders(d.reminders || cat().reminders.map(r => Object.assign({}, r, { def: true })));
-      list.forEach(r => remBox.appendChild(h('div', { class: 'row' }, [
+      const remove = r => h('button', { type: 'button', class: 'x-btn', 'aria-label': 'Remove reminder', onclick: () => { d.reminders = list.filter(x => x !== r); renderReminders(); } }, [Pz.icon('x', 16)]);
+      list.forEach(r => remBox.appendChild(C.isExact(r) ? exactRow(r, remove(r)) : h('div', { class: 'row' }, [
         h('span', { class: 'row-icon' }, [Pz.icon('bell', 18)]),
         h('span', { class: 'row-grow', text: C.reminderLabel(r) }),
         r.def && defLabel(),
-        h('button', { type: 'button', class: 'x-btn', 'aria-label': 'Remove reminder', onclick: () => { d.reminders = list.filter(x => x !== r); renderReminders(); } }, [Pz.icon('x', 16)])
+        remove(r)
       ])));
       remBox.appendChild(h('button', { type: 'button', class: 'row link', text: '+ Add reminder', onclick: () => {
         const have = list.map(C.reminderKey);
-        ui.actions({ title: 'Add a reminder', left: true, buttons: C.reminderChoices.filter(r => !have.includes(C.reminderKey(r))).map(r => ({ label: C.reminderLabel(r), value: r })) })
-          .then(r => { if (r) { d.reminders = list.concat([Object.assign({}, r)]); renderReminders(); } });
+        const buttons = C.reminderChoices.filter(r => !have.includes(C.reminderKey(r))).map(r => ({ label: C.reminderLabel(r), value: r }));
+        buttons.push({ label: 'Custom date & time…', value: 'exact' });
+        ui.actions({ title: 'Add a reminder', left: true, buttons: buttons }).then(r => {
+          if (!r) return;
+          d.reminders = list.concat([r === 'exact' ? { n: 0, unit: 'exact', at: exactStart() } : Object.assign({}, r)]);
+          renderReminders();
+        });
       } }));
+    }
+    // A custom reminder starts 1 hour before the item (all-day: 09:00 the day before); then pick any date and time.
+    const exactStart = () => d.type === 'allday' ? D.addDays(d.sDate, -1) + 'T09:00' : D.addMinutes(d.sDate + 'T' + d.sTime, -60);
+    // Its row: a bell, then a date pill and a time pill (type or tap the icon, like Starts / Ends), then ×.
+    function exactRow(r, xBtn) {
+      let date = r.at.slice(0, 10), time = r.at.slice(11, 16);
+      const set = () => { r.at = date + 'T' + time; };
+      const dp = pill('date', date, v => { date = v; set(); }, { label: 'Reminder date' });
+      const tp = pill('time', time, v => { time = v; set(); }, { label: 'Reminder time' });
+      return h('div', { class: 'row' }, [
+        h('span', { class: 'row-icon' }, [Pz.icon('bell', 18)]),
+        h('span', { class: 'pills', style: { flex: '1', justifyContent: 'flex-start' } }, [dp.el, tp.el]),
+        xBtn
+      ]);
     }
 
     // ---- Countdown ----
