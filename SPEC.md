@@ -159,22 +159,22 @@ Six big steps, **hardest first**: the tricky logic (calendar repeats, auto-tasks
 - [x] **Step 6 – Polish and final checks.** Bigger hit areas everywhere, the backup nudge, speed check with a year of sample data, then go through section 13 with me on my laptop and iPhone and fix what we find. Update CLAUDE.md to say the app is complete.
 
 ## 13. Final checks (tick when tested on my iPhone)
-Note (19 Nov 2026): step 6 was ticked after a partial check. I tested the step 6 changes and the changes made just before it, but not every line below, so these boxes are left unticked until each one has really been tested.
-- [ ] Every screen matches DESIGN.md in dark AND light mode.
-- [ ] Habits: add, edit, archive, unarchive, reorder, delete; ticking on Today and Habits for past and future days; streaks, best streaks and "2 of 3 this week" are right; progress bar counts daily habits only.
-- [ ] Perfect day and milestones appear at the right moments, with sounds (and sounds can be turned off).
-- [ ] The graph matches what I ticked.
-- [ ] Calendar: add, edit and delete events, deadlines and all-day items; all four views look right; the day panel opens.
-- [ ] Repeats work, including "This one only / This and future ones / All".
-- [ ] Category defaults apply to new items and can be changed per item.
-- [ ] Countdowns appear on time and turn orange then red.
-- [ ] Auto-tasks appear on the right day, carry over, and link to their event.
-- [ ] Reminders show in the bell.
-- [ ] To-dos carry over and month badges are right.
-- [ ] Search finds past and future items; the filter lists upcoming items.
-- [ ] Lists: notes, to-dos, subtasks, priorities, pins, search, completed items; due-dated to-dos show on their day.
-- [ ] Export and import bring everything back.
-- [ ] Works from the home-screen icon in Airplane Mode; data survives closing the app.
+Note (19 Nov 2026): step 6 was ticked after a partial check, so these boxes were left unticked until each was really tested. **All ticked 21 Nov 2026**, after I confirmed everything works on my iPhone.
+- [x] Every screen matches DESIGN.md in dark AND light mode.
+- [x] Habits: add, edit, archive, unarchive, reorder, delete; ticking on Today and Habits for past and future days; streaks, best streaks and "2 of 3 this week" are right; progress bar counts daily habits only.
+- [x] Perfect day and milestones appear at the right moments, with sounds (and sounds can be turned off).
+- [x] The graph matches what I ticked.
+- [x] Calendar: add, edit and delete events, deadlines and all-day items; all four views look right; the day panel opens.
+- [x] Repeats work, including "This one only / This and future ones / All".
+- [x] Category defaults apply to new items and can be changed per item.
+- [x] Countdowns appear on time and turn orange then red.
+- [x] Auto-tasks appear on the right day, carry over, and link to their event.
+- [x] Reminders show in the bell.
+- [x] To-dos carry over and month badges are right.
+- [x] Search finds past and future items; the filter lists upcoming items.
+- [x] Lists: notes, to-dos, subtasks, priorities, pins, search, completed items; due-dated to-dos show on their day.
+- [x] Export and import bring everything back.
+- [x] Works from the home-screen icon in Airplane Mode; data survives closing the app.
 
 ## 14. Later list (not planned; don't build)
 - Real phone notifications (needs a server).
