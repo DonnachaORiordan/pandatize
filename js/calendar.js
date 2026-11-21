@@ -54,7 +54,7 @@
     };
     ui.hdrag(page, {
       accept: (dx, target, startX) => {
-        if (busy || panel || ui.modalOpen() || !ownsSwipe(startX)) return false;
+        if (busy || ui.modalOpen() || !ownsSwipe(startX)) return false;      // (works with the day panel open too: move() closes it)
         if (target.closest('input, textarea, select, [data-noswipe]')) return false;
         const row = target.closest('[data-swiperow]');             // a LEFT swipe on a to-do row deletes it instead
         if (row) return dx > 0 && !row.pzIsOpen();

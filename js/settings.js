@@ -38,7 +38,8 @@
       h('div', { class: 'screen-top' }, [ui.backLink('Today', Pz.nav.pop)]),
       h('h1', { class: 'big-title', text: 'Settings', style: { marginBottom: '20px' } }),
       box,
-      h('div', { class: 'version', text: Pz.config.appName + ' ' + Pz.config.version })
+      h('div', { class: 'version', text: Pz.config.appName + ' ' + Pz.config.version }),
+      Pz.app.screenInfo() && h('div', { class: 'version', style: { marginTop: '4px', opacity: '.6' }, text: Pz.app.screenInfo() })
     ]), stop);
     draw();
   }

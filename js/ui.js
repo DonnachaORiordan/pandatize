@@ -37,6 +37,18 @@
     Pz.ui.nextFrame(() => el.classList.add('open'));
   };
 
+  // Safety net (21 Nov 2026): the same pop-up can't open twice within half a second while the first
+  // one is still open (e.g. if the phone delivers one tap twice). The second request gets the one
+  // already open. (Each pop-up's box is "wrap"; it loses its "open" label the moment it closes.)
+  const recent = {};
+  const already = (key, make) => {
+    const r = recent[key];
+    if (r && Date.now() - r.at < 500 && r.wrap.classList.contains('open')) return r.value;
+    const made = make();
+    recent[key] = { at: Date.now(), value: made.value, wrap: made.wrap };
+    return made.value;
+  };
+
   // ---- Small controls ----
   ui.roundBtn = (icon, label, onClick, extra) =>
     h('button', { type: 'button', class: 'round-btn ' + (extra || ''), 'aria-label': label, onclick: onClick }, [Pz.icon(icon, extra && extra.indexOf('small') >= 0 ? 18 : 20)]);
@@ -131,7 +143,8 @@
   };
 
   // ---- Sheet: slides up from the bottom with Cancel / Title / Save ----
-  ui.sheet = opts => {
+  ui.sheet = opts => already('sheet|' + opts.title, () => makeSheet(opts));
+  function makeSheet(opts) {
     const wrap = h('div', { class: 'sheet-wrap' });
     let closed = false;
     const close = () => {
@@ -153,13 +166,21 @@
     ]));
     modals++;
     mount('sheets', wrap);
-    return { close: close, el: wrap };
-  };
+    return { value: { close: close, el: wrap }, wrap: wrap };
+  }
 
   // ---- Action sheet: a question with a few buttons. Gives back the chosen value (or undefined). ----
   // buttons: [{ label, value, danger, color, checked }]
-  ui.actions = opts => new Promise(resolve => {
+  ui.actions = opts => {
+    let first = false;
+    const p = already('actions|' + (opts.title || '') + (opts.message || ''), () => { first = true; return makeActions(opts); });
+    return first ? p : Promise.resolve(undefined);          // a repeat gets "nothing chosen", so nothing happens twice
+  };
+  const makeActions = opts => {
     const wrap = h('div', { class: 'sheet-wrap' + (opts.left ? ' as-left' : '') });
+    return { wrap: wrap, value: new Promise(resolve => fillActions(opts, wrap, resolve)) };
+  };
+  function fillActions(opts, wrap, resolve) {
     let closed = false;
     const close = v => {
       if (closed) return; closed = true; modals--;
@@ -181,7 +202,7 @@
     wrap.appendChild(h('div', { class: 'as-box' }, [group, !opts.noCancel && h('button', { type: 'button', class: 'as-btn as-cancel', text: 'Cancel', onclick: () => close(undefined) })]));
     modals++;
     mount('sheets', wrap);
-  });
+  }
   // A message with just an OK button
   ui.message = (title, message) => ui.actions({ title: title, message: message, buttons: [{ label: 'OK', value: 'ok' }], noCancel: true });
 
@@ -201,7 +222,8 @@
   };
 
   // ---- Panel: a shorter slide-up box with a title and a list (e.g. Reminders). Tap outside to close. ----
-  ui.panel = (title, actionLabel, onAction, onClose) => {
+  ui.panel = (title, actionLabel, onAction, onClose) => already('panel|' + title, () => makePanel(title, actionLabel, onAction, onClose));
+  function makePanel(title, actionLabel, onAction, onClose) {
     const wrap = h('div', { class: 'sheet-wrap' });
     let closed = false;
     const close = () => {
@@ -222,8 +244,8 @@
     ]));
     modals++;
     mount('sheets', wrap);
-    return { body: body, close: close };
-  };
+    return { value: { body: body, close: close }, wrap: wrap };
+  }
 
   // ---- Press and hold, then drag, to reorder ----
   // Children of "container" marked data-reorder can be picked up after a short hold and dragged

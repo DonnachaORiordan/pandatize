@@ -13,8 +13,9 @@
   const screens = [];
   let index = 0, track, bar;
 
-  // Swiping between tabs is switched off while something is open on top.
-  const blocked = () => ui.modalOpen() || screens.length > 0 || (Pz.calendar && Pz.calendar.panelOpen());
+  // Swiping between tabs is switched off while something is open on top. (Not the day panel: since
+  // 21 Nov 2026 a swipe with it open still changes tab, and the panel closes; see go().)
+  const blocked = () => ui.modalOpen() || screens.length > 0;
 
   function place(animate, dx) {
     const still = Pz.fx.reduced();           // iPhone "Reduce Motion": no slide, a quick fade instead

@@ -23,18 +23,28 @@
   // ---- Use the whole screen (my request, 21 Nov 2026) ----
   // Opened from the iPhone home screen, the app is drawn under the status bar, but iOS can report
   // the app's height as the screen minus the status bar, which left an empty strip at the bottom.
-  // So, only in the iPhone home-screen app, upright, and only if there really is a gap, the app is
-  // pinned to the top and stretched to the full screen height. Everywhere else nothing changes.
-  // (Fixed 21 Nov 2026: it now measures the app itself, not the window, which can report the full
-  // height even when the app stops short; and it checks again just after opening.)
+  // So, in the iPhone home-screen app (held upright), the app is ALWAYS pinned to the top and made
+  // exactly as tall as the screen. (If there was no gap, that's the same height it already had.)
+  // In Safari, on other phones and on the laptop nothing changes.
+  // (Changed 21 Nov 2026: earlier versions only stretched when they detected a gap, and on my iPhone
+  // they didn't. Being "from the home screen" is now detected two ways, in case one doesn't work.)
+  const isIOS = typeof navigator.standalone === 'boolean' || /iPhone|iPad|iPod/.test(navigator.userAgent);
+  const fromHomeScreen = () => navigator.standalone === true ||
+    !!(window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches));
   function fitScreen() {
     const app = document.getElementById('app');
     const full = Math.max(screen.width, screen.height);
-    const upright = window.innerWidth < window.innerHeight;
-    if (navigator.standalone !== true || !upright) { app.classList.remove('full-screen'); app.style.height = ''; return; }
-    if (app.classList.contains('full-screen')) return;                 // already stretched
-    const gap = full - app.getBoundingClientRect().height;
-    if (gap > 1 && gap < 150) { app.classList.add('full-screen'); app.style.height = full + 'px'; }
+    const stretch = isIOS && fromHomeScreen() && window.innerWidth < window.innerHeight;
+    app.classList.toggle('full-screen', stretch);
+    app.style.height = stretch ? full + 'px' : '';
+  }
+  // A small line of sizes shown under the version number in Settings (home-screen iPhone app only),
+  // so if a gap ever remains, the numbers show why. e.g. "Screen 393×852 · window 393×793 · app 852 · filled"
+  function screenInfo() {
+    if (!isIOS || !fromHomeScreen()) return '';
+    const app = document.getElementById('app');
+    return 'Screen ' + screen.width + '×' + screen.height + ' · window ' + window.innerWidth + '×' + window.innerHeight +
+      ' · app ' + Math.round(app.getBoundingClientRect().height) + (app.classList.contains('full-screen') ? ' · filled' : ' · not filled');
   }
 
   // Called whenever saved data changes, so every screen showing it redraws.
@@ -103,6 +113,6 @@
     });
   }
 
-  Pz.app = { changed: changed, listen: listen, applyTheme: applyTheme };
+  Pz.app = { changed: changed, listen: listen, applyTheme: applyTheme, screenInfo: screenInfo };
   start();
 })();

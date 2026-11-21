@@ -161,8 +161,8 @@
       rem.appendChild(h('button', { type: 'button', class: 'row link', text: '+ Add reminder', onclick: () => {
         const have = c.reminders.map(C.reminderKey);
         const add = r => { if (r && !have.includes(C.reminderKey(r))) change(() => { c.reminders.push(Object.assign({}, r)); }); };
-        ui.actions({ title: 'Add a reminder', left: true, buttons: C.reminderChoices.filter(r => !have.includes(C.reminderKey(r))).map(r => ({ label: C.reminderLabel(r), value: r }))
-          .concat([{ label: 'Custom…', value: 'custom' }]) })
+        ui.actions({ title: 'Add a reminder', left: true, buttons: [{ label: 'Custom…', value: 'custom' }].concat(C.reminderChoices.filter(r => !have.includes(C.reminderKey(r)))
+          .map(r => ({ label: C.reminderLabel(r), value: r }))) })
           .then(r => { if (r === 'custom') C.pickReminder().then(add); else add(r); });
       } }));
       box.appendChild(rem);

@@ -4,16 +4,11 @@
    streak milestones and finishing a deadline. Nothing moves at a constant speed.
    js/fx.js and js/celebrate.js decide WHEN these play. The "Reduce Motion" rules are at the end. */
 
-/* ---------- Sheets and panels spring up: they overshoot a little and settle back ---------- */
-.sheet-wrap.open .sheet, .sheet-wrap.open .as-box { animation: pzSpringUp .52s both; }
-/* The day panel just slides up once, smoothly, with no overshoot (my request, 21 Nov 2026) */
+/* ---------- Pop-ups slide up ONCE, smoothly, with no overshoot (my request, 21 Nov 2026) ----------
+   Sheets, action sheets (e.g. "Add a reminder"), the Reminders panel and the day panel used to spring
+   past their place and settle back; on the iPhone that looked like they popped up twice. Now each one
+   just glides up and slows to a stop (the slides themselves are in css/app.css and css/calendar.css). */
 .day-panel { transition: transform .34s cubic-bezier(.25,.9,.3,1); }
-@keyframes pzSpringUp {
-  0%   { transform: translateY(100%); animation-timing-function: cubic-bezier(.2,.75,.35,1); }
-  62%  { transform: translateY(-9px);  animation-timing-function: ease-in-out; }
-  84%  { transform: translateY(2px);   animation-timing-function: ease-in-out; }
-  100% { transform: translateY(0); }
-}
 /* The sheet's colour carries on below its bottom edge, so no gap shows while it overshoots */
 .sheet::after, .day-panel::after { content: ''; position: absolute; left: 0; right: 0; top: calc(100% - 1px); height: 40px; background: inherit; pointer-events: none; }
 

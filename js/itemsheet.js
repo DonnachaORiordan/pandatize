@@ -144,7 +144,7 @@
       remBox.appendChild(h('button', { type: 'button', class: 'row link', text: '+ Add reminder', onclick: () => {
         const have = list.map(C.reminderKey);
         const buttons = C.reminderChoices.filter(r => !have.includes(C.reminderKey(r))).map(r => ({ label: C.reminderLabel(r), value: r }));
-        buttons.push({ label: 'Custom…', value: 'custom' }, { label: 'Exact date & time…', value: 'exact' });
+        buttons.unshift({ label: 'Custom…', value: 'custom' }, { label: 'Exact date & time…', value: 'exact' });      // (my own options first)
         const add = r => {
           if (!r || (!C.isExact(r) && have.includes(C.reminderKey(r)))) return;     // (already there)
           d.reminders = list.concat([Object.assign({}, r)]);
