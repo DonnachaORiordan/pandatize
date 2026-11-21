@@ -23,11 +23,13 @@
   // ---- Use the whole screen (my request, 21 Nov 2026) ----
   // Opened from the iPhone home screen, the app is drawn under the status bar, but iOS can report
   // the app's height as the screen minus the status bar, which left an empty strip at the bottom.
-  // So, in the iPhone home-screen app (held upright), the app is ALWAYS pinned to the top and made
-  // exactly as tall as the screen. (If there was no gap, that's the same height it already had.)
-  // In Safari, on other phones and on the laptop nothing changes.
-  // (Changed 21 Nov 2026: earlier versions only stretched when they detected a gap, and on my iPhone
-  // they didn't. Being "from the home screen" is now detected two ways, in case one doesn't work.)
+  // On my iPhone (21 Nov 2026) the numbers were: screen 390×844, window 390×797. The window is 47
+  // short (the status bar's height), and the phone only shows the PAGE within those 797 points; below
+  // that it shows just the plain colour behind the page. Stretching only the app wasn't enough, because
+  // the stretched part fell outside the page and was cut off. So now the page itself (html and body)
+  // AND the app are made exactly as tall as the screen; the phone then draws the app right to the bottom.
+  // Only in the iPhone home-screen app, held upright. In Safari, on other phones and on the laptop
+  // nothing changes. (Being "from the home screen" is detected two ways, in case one doesn't work.)
   const isIOS = typeof navigator.standalone === 'boolean' || /iPhone|iPad|iPod/.test(navigator.userAgent);
   const fromHomeScreen = () => navigator.standalone === true ||
     !!(window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches));
@@ -35,16 +37,25 @@
     const app = document.getElementById('app');
     const full = Math.max(screen.width, screen.height);
     const stretch = isIOS && fromHomeScreen() && window.innerWidth < window.innerHeight;
+    const height = stretch ? full + 'px' : '';
     app.classList.toggle('full-screen', stretch);
-    app.style.height = stretch ? full + 'px' : '';
+    [document.documentElement, document.body, app].forEach(el => { el.style.height = height; });
+    if (stretch && (window.scrollX || window.scrollY)) window.scrollTo(0, 0);      // the page never sits scrolled
   }
   // A small line of sizes shown under the version number in Settings (home-screen iPhone app only),
   // so if a gap ever remains, the numbers show why. e.g. "Screen 393×852 · window 393×793 · app 852 · filled"
   function screenInfo() {
     if (!isIOS || !fromHomeScreen()) return '';
     const app = document.getElementById('app');
+    // (also: the page's height, and the phone's top/bottom "safe area" margins, measured with a hidden probe)
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+    document.body.appendChild(probe);
+    const cs = getComputedStyle(probe), safe = parseFloat(cs.paddingTop) + '/' + parseFloat(cs.paddingBottom);
+    probe.remove();
     return 'Screen ' + screen.width + '×' + screen.height + ' · window ' + window.innerWidth + '×' + window.innerHeight +
-      ' · app ' + Math.round(app.getBoundingClientRect().height) + (app.classList.contains('full-screen') ? ' · filled' : ' · not filled');
+      ' · page ' + document.documentElement.clientHeight + ' · app ' + Math.round(app.getBoundingClientRect().height) +
+      ' · safe ' + safe + (app.classList.contains('full-screen') ? ' · filled' : ' · not filled');
   }
 
   // Called whenever saved data changes, so every screen showing it redraws.
@@ -81,6 +92,14 @@
     window.addEventListener('resize', fitScreen);
     window.addEventListener('orientationchange', () => setTimeout(fitScreen, 300));
     document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(fitScreen, 100); });
+    // The page is now a little taller than the phone's "window", so make sure it never stays shifted up:
+    // put it back at the top whenever it moves, except while typing (the phone moves it to keep the
+    // text box above the keyboard), and once typing is finished.
+    const typing = () => !!(document.activeElement && document.activeElement.matches('input, textarea, select'));
+    window.addEventListener('scroll', () => {
+      if (document.getElementById('app').classList.contains('full-screen') && !typing() && (window.scrollX || window.scrollY)) window.scrollTo(0, 0);
+    });
+    document.addEventListener('focusout', () => setTimeout(() => { if (!typing()) fitScreen(); }, 150));
     Pz.storage.load();
     applyTheme();
     lastDay = Pz.dates.today();

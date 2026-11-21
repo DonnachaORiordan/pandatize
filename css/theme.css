@@ -103,9 +103,8 @@ svg { display: block; flex: none; }
   overflow: hidden;
   background: var(--bg);
 }
-/* iPhone home-screen app with a gap at the bottom (js/app.js sets the full screen height):
-   pinned to the top so the taller app never makes the page itself scrollable. */
-#app.full-screen { position: fixed; top: 0; left: 0; right: 0; }
+/* iPhone home-screen app: js/app.js makes the page and the app exactly as tall as the screen
+   (21 Nov 2026). The app stays in the page (not pinned), so the phone draws it right to the bottom. */
 /* On a phone, whatever is behind the app (normally hidden) is the same colour as the bottom of the
    app's background, so the bottom edge of the screen is never a black strip (21 Nov 2026).
    On a wide laptop window the plain colour around the phone-width column stays as it was. */
