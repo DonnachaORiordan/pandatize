@@ -42,21 +42,6 @@
     [document.documentElement, document.body, app].forEach(el => { el.style.height = height; });
     if (stretch && (window.scrollX || window.scrollY)) window.scrollTo(0, 0);      // the page never sits scrolled
   }
-  // A small line of sizes shown under the version number in Settings (home-screen iPhone app only),
-  // so if a gap ever remains, the numbers show why. e.g. "Screen 393×852 · window 393×793 · app 852 · filled"
-  function screenInfo() {
-    if (!isIOS || !fromHomeScreen()) return '';
-    const app = document.getElementById('app');
-    // (also: the page's height, and the phone's top/bottom "safe area" margins, measured with a hidden probe)
-    const probe = document.createElement('div');
-    probe.style.cssText = 'position:absolute;visibility:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
-    document.body.appendChild(probe);
-    const cs = getComputedStyle(probe), safe = parseFloat(cs.paddingTop) + '/' + parseFloat(cs.paddingBottom);
-    probe.remove();
-    return 'Screen ' + screen.width + '×' + screen.height + ' · window ' + window.innerWidth + '×' + window.innerHeight +
-      ' · page ' + document.documentElement.clientHeight + ' · app ' + Math.round(app.getBoundingClientRect().height) +
-      ' · safe ' + safe + (app.classList.contains('full-screen') ? ' · filled' : ' · not filled');
-  }
 
   // Called whenever saved data changes, so every screen showing it redraws.
   function changed() {
@@ -132,6 +117,6 @@
     });
   }
 
-  Pz.app = { changed: changed, listen: listen, applyTheme: applyTheme, screenInfo: screenInfo };
+  Pz.app = { changed: changed, listen: listen, applyTheme: applyTheme };
   start();
 })();
